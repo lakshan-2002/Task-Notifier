@@ -1,0 +1,180 @@
+/* Modern Light Theme Signup Page Styles */
+.signup-page {
+  min-height: 100vh;
+  background: #f5f6fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+}
+
+.signup-container {
+  width: 100vw;
+  min-height: 100vh;
+  margin-top: -10px;
+  background: #f5f6fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.signup-content {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.08);
+  padding: 40px 32px 32px 32px;
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+}
+
+.signup-header {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.signup-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #222;
+  margin: 0 0 8px 0;
+  line-height: 1.14;
+  letter-spacing: -0.01em;
+}
+
+.signup-header p {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #666;
+  margin: 0;
+  line-height: 1.33;
+}
+
+.signup-form {
+  width: 450px;
+  margin-right: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #444;
+  line-height: 1.33;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 10px 14px;
+  background: #f7f8fa;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #222;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  transition: border 0.2s;
+}
+
+.form-group input::placeholder {
+  color: #bbb;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #6c63ff;
+  background: #fff;
+}
+
+.form-group input.error {
+  border-color: #C51B1B;
+}
+
+.error-message {
+  font-size: 0.92rem;
+  color: #C51B1B;
+  margin-top: 2px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  font-size: 0.97rem;
+  font-weight: 500;
+  color: #444;
+}
+
+.checkbox-input {
+  accent-color: #6c63ff;
+}
+
+.signup-button {
+  width: 480px;
+  margin-top: 2px;
+  padding: 10px 0;
+  background: #6c63ff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.08rem;
+  font-weight: 600;
+  color: #fff;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  cursor: pointer;
+  transition: background 0.2s;
+  line-height: 1.33;
+}
+
+.signup-button:hover {
+  background: #554ee2;
+}
+
+.login-link {
+  text-align: center;
+  margin-top: 2px;
+}
+
+.login-link p {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #444;
+  margin: 0;
+  line-height: 1.33;
+}
+
+.link-button {
+  background: none;
+  border: none;
+  color: #6c63ff;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: underline;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  transition: color 0.2s;
+}
+
+.link-button:hover {
+  color: #554ee2;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  .signup-content {
+    padding: 24px 8px 16px 8px;
+    max-width: 98vw;
+  }
+}
