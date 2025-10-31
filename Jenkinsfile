@@ -7,5 +7,11 @@ pipeline {
                 echo 'Hello, World!'
             }
         }
+        stage('Run hello_world.py') {
+            steps {
+            checkout scm
+            sh 'python3 hello_world.py'
+            }
+        }
     }
 }
