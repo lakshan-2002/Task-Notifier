@@ -1,0 +1,109 @@
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+  margin-bottom: 36px;
+  width: 100%;
+}
+
+.card {
+  background-color: #ffffff;
+  border-radius: 18px;
+  padding: 28px;
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  width: 100%;
+  min-width: 0;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.card-blue {
+  border-left: 5px solid #3b82f6;
+}
+
+.card-orange {
+  border-left: 5px solid #f59e0b;
+}
+
+.card-green {
+  border-left: 5px solid #10b981;
+}
+
+.card-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f3f4f6;
+  color: #1f2937;
+  flex-shrink: 0;
+}
+
+.card-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.card-label {
+  font-size: 20px;
+  color: #6b7280;
+  margin: 0 0 10px 0;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+.card-value {
+  font-size: 38px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 10px 0;
+  line-height: 1;
+}
+
+.card-trend {
+  font-size: 14px;
+  color: #10b981;
+  margin: 0;
+  font-weight: 500;
+}
+
+@media (max-width: 1400px) {
+  .cards-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+  }
+  
+  .card-value {
+    font-size: 34px;
+  }
+}
+
+@media (max-width: 768px) {
+  .cards-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .card {
+    padding: 24px;
+  }
+  
+  .card-value {
+    font-size: 32px;
+  }
+  
+  .card-icon {
+    width: 56px;
+    height: 56px;
+  }
+}

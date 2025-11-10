@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { ToastContainer } from 'react-toastify';
 import Login from "./Login";
 import Signup from "./Signup";
+import Dashboard from "./Dashboard";
 
 const App = () => {
   return (
@@ -17,6 +18,9 @@ const App = () => {
           
           {/* Signup page */}
           <Route path="/signup" element={<Signup />} />
+
+          {/* Dashboard page */}
+          <Route path="/dashboard" element={<Dashboard />} />
 
           {/* Catch all - redirect to login */}
           <Route path="*" element={<Navigate to="/login" replace />} />
