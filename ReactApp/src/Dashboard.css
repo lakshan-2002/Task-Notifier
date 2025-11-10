@@ -22,103 +22,6 @@ body, html, #root {
   padding: 0;
 }
 
-/* Sidebar Styles */
-.sidebar {
-  width: 300px;
-  background-color: #1f2937;
-  color: #ffffff;
-  display: flex;
-  flex-direction: column;
-  padding: 28px 20px 24px 20px;
-  transition: all 0.3s ease;
-  position: fixed;
-  height: 100vh;
-  left: 0;
-  top: 0;
-  z-index: 1000;
-  overflow-y: auto;
-  margin: 0;
-}
-
-.sidebar-closed {
-  transform: translateX(-100%);
-}
-
-.sidebar-header {
-  margin: 0 0 32px 0;
-  padding: 0 0 24px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.logo {
-  font-size: 26px;
-  font-weight: 700;
-  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin: 0;
-  margin-left: 20px;
-  padding: 0;
-}
-
-.nav {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  flex: 1;
-}
-
-.nav-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  background-color: transparent;
-  color: #d1d5db;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 15px;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  text-align: left;
-}
-
-.nav-item:hover {
-  background-color: rgba(59, 130, 246, 0.1);
-  color: #93c5fd;
-}
-
-.nav-item-active {
-  background-color: rgba(59, 130, 246, 0.2);
-  color: #60a5fa;
-}
-
-.nav-text {
-  font-size: 18px;
-}
-
-.logout-btn {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  background-color: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 15px;
-  font-weight: 500;
-  margin-top: auto;
-  transition: all 0.2s ease;
-}
-
-.logout-btn:hover {
-  background-color: rgba(239, 68, 68, 0.2);
-}
-
 /* Main Content Styles */
 .main {
   margin-left: 320px;
@@ -134,7 +37,7 @@ body, html, #root {
   width: 100vw;
 }
 
-/* Header Styles - UPDATE the existing .header section */
+/* Header Styles */
 .header {
   display: flex;
   align-items: center;
@@ -214,7 +117,7 @@ body, html, #root {
   margin: 0;
 }
 
-/* Search Bar Styles - ADD these new styles */
+/* Search Bar Styles */
 .search-bar {
   display: flex;
   align-items: center;
@@ -251,7 +154,12 @@ body, html, #root {
   color: #9ca3af;
 }
 
-/* Update avatar for hover effect */
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .avatar {
   width: 44px;
   height: 44px;
@@ -274,7 +182,7 @@ body, html, #root {
   transform: scale(1.05);
 }
 
-/* Responsive updates - ADD to your existing media queries */
+/* Responsive updates */
 @media (max-width: 1024px) {
   .search-bar {
     min-width: 240px;
@@ -282,6 +190,12 @@ body, html, #root {
 }
 
 @media (max-width: 768px) {
+  .main {
+    margin-left: 0;
+    width: 100vw;
+    padding: 20px;
+  }
+  
   .header {
     flex-direction: column;
     align-items: stretch;

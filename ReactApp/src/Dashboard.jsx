@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { LayoutDashboard, Plus, ListTodo, CheckCircle, User, LogOut, Menu, X, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
+import Sidebar from './components/Sidebar';
 import OverviewCards from './components/OverviewCards';
 import Charts from './components/Charts';
 import './Dashboard.css';
@@ -9,43 +10,25 @@ const Dashboard = () => {
   const [activePage, setActivePage] = useState('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const navItems = [
-    { id: 'dashboard', name: 'Dashboard', icon: LayoutDashboard },
-    { id: 'add-task', name: 'Add Task', icon: Plus },
-    { id: 'all-tasks', name: 'All Tasks', icon: ListTodo },
-    { id: 'completed', name: 'Completed Tasks', icon: CheckCircle },
-    { id: 'profile', name: 'Profile', icon: User },
-  ];
+  const handleNavigate = (pageId) => {
+    setActivePage(pageId);
+    // Add navigation logic here if needed
+  };
+
+  const handleLogout = () => {
+    // Add logout logic here
+    console.log('Logging out...');
+  };
 
   return (
     <div className="dashboard-container">
       {/* Sidebar */}
-      <aside className={`sidebar ${!isSidebarOpen ? 'sidebar-closed' : ''}`}>
-        <div className="sidebar-header">
-          <h2 className="logo">TaskNotifier</h2>
-        </div>
-        
-        <nav className="nav">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <button
-                key={item.id}
-                onClick={() => setActivePage(item.id)}
-                className={`nav-item ${activePage === item.id ? 'nav-item-active' : ''}`}
-              >
-                <Icon size={20} />
-                <span className="nav-text">{item.name}</span>
-              </button>
-            );
-          })}
-        </nav>
-
-        <button className="logout-btn">
-          <LogOut size={20} />
-          <span className="nav-text">Logout</span>
-        </button>
-      </aside>
+      <Sidebar 
+        isOpen={isSidebarOpen}
+        activePage={activePage}
+        onNavigate={handleNavigate}
+        onLogout={handleLogout}
+      />
 
       {/* Main Content */}
       <main className={`main ${!isSidebarOpen ? 'main-expanded' : ''}`}>
@@ -56,11 +39,11 @@ const Dashboard = () => {
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
               className="menu-btn"
             >
-                <div className="hamburger-icon">  
-                  <span></span>
-                  <span></span>
-                  <span></span>
-                </div>  
+              <div className="hamburger-icon">  
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>  
             </button>
             <h1 className="page-title">Dashboard</h1>
           </div>
