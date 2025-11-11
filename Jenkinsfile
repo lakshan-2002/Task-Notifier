@@ -12,18 +12,6 @@ pipeline {
       }
     }
 
-    stage('Set Image Tag') {
-      steps {
-        script {
-          def branch = env.BRANCH_NAME ?: sh(returnStdout: true, script: "git rev-parse --abbrev-ref HEAD").trim()
-          def sha = sh(returnStdout: true, script: "git rev-parse --short HEAD").trim()
-          branch = branch.replaceAll('/', '-')
-          env.IMAGE_TAG = "${branch}-${sha}"
-          echo "Image tag: ${env.IMAGE_TAG}"
-        }
-      }
-    }
-
     stage('Docker Login') {
       steps {
         withCredentials([usernamePassword(
@@ -42,17 +30,9 @@ pipeline {
       steps {
         dir('frontend') {
           sh '''
-            docker build -t lakshan2002/tasknotifier-frontend${IMAGE_TAG} .
-            docker push lakshan2002/tasknotifier-frontend:${IMAGE_TAG}
+            docker build -t lakshan2002/tasknotifier-frontend:latest .
+            docker push lakshan2002/tasknotifier-frontend:latest
           '''
-          script {
-            if (env.BRANCH_NAME == 'master') {
-              sh '''
-                docker tag lakshan2002/tasknotifier-frontend:${IMAGE_TAG} lakshan2002/tasknotifier-frontend:latest
-                docker push lakshan2002/tasknotifier-frontend:latest
-              '''
-            }
-          }
         }
       }
     }
@@ -61,17 +41,9 @@ pipeline {
       steps {
         dir('backend') {
           sh '''
-            docker build -t lakshan2002/tasknotifier-backend:${IMAGE_TAG} .
-            docker push lakshan2002/tasknotifier-backend:${IMAGE_TAG}
+            docker build -t lakshan2002/tasknotifier-backend:latest .
+            docker push lakshan2002/tasknotifier-backend:latest
           '''
-          script {
-            if (env.BRANCH_NAME == 'master') {
-              sh '''
-                docker tag lakshan2002/tasknotifier-backend:${IMAGE_TAG} lakshan2002/tasknotifier-backend:latest
-                docker push lakshan2002/tasknotifier-backend:latest
-              '''
-            }
-          }
         }
       }
     }
