@@ -17,16 +17,16 @@ pipeline {
             steps {
                 dir('ReactApp') {
                     withCredentials([usernamePassword(
-                        credentialsId: "${env.DOCKERHUB_CREDS}",
+                        credentialsId: "${DOCKERHUB_CREDS}",
                         usernameVariable: 'DH_USER',
                         passwordVariable: 'DH_PASS'
                     )]) {
-                        script {
-                            docker.withRegistry('https://registry.hub.docker.com', "${env.DOCKERHUB_CREDS}") {
-                                def frontendImage = docker.build("lakshan2002/tasknotifier-frontend:latest")
-                                frontendImage.push()
-                            }
-                        }
+                        sh '''
+                            echo $DH_PASS | docker login --username $DH_USER --password-stdin
+                            docker build -t lakshan2002/tasknotifier-frontend:latest .
+                            docker push lakshan2002/tasknotifier-frontend:latest
+                            docker logout
+                        '''
                     }
                 }
             }
@@ -34,27 +34,19 @@ pipeline {
 
         stage('Build and Push Backend') {
             steps {
-                dir('backend') {
-                    withCredentials([usernamePassword(
-                        credentialsId: "${env.DOCKERHUB_CREDS}",
-                        usernameVariable: 'DH_USER',
-                        passwordVariable: 'DH_PASS'
-                    )]) {
-                        script {
-                            docker.withRegistry('https://registry.hub.docker.com', "${env.DOCKERHUB_CREDS}") {
-                                def backendImage = docker.build("lakshan2002/tasknotifier-backend:latest")
-                                backendImage.push()
-                            }
-                        }
-                    }
+                withCredentials([usernamePassword(
+                    credentialsId: "${DOCKERHUB_CREDS}",
+                    usernameVariable: 'DH_USER',
+                    passwordVariable: 'DH_PASS'
+                )]) {
+                    sh '''
+                        echo $DH_PASS | docker login --username $DH_USER --password-stdin
+                        docker build -t lakshan2002/tasknotifier-backend:latest -f Dockerfile .
+                        docker push lakshan2002/tasknotifier-backend:latest
+                        docker logout
+                    '''
                 }
             }
-        }
-    }
-
-    post {
-        always {
-            echo "Pipeline finished."
         }
     }
 }
