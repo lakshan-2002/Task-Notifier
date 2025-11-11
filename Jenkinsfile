@@ -28,7 +28,7 @@ pipeline {
 
     stage('Build and Push Frontend') {
       steps {
-        dir('frontend') {
+        dir('ReactApp') {
           sh '''
             docker build -t lakshan2002/tasknotifier-frontend:latest .
             docker push lakshan2002/tasknotifier-frontend:latest
@@ -39,12 +39,10 @@ pipeline {
 
     stage('Build and Push Backend') {
       steps {
-        dir('backend') {
           sh '''
-            docker build -t lakshan2002/tasknotifier-backend:latest .
+            docker build -t lakshan2002/tasknotifier-backend:latest -f Dockerfile
             docker push lakshan2002/tasknotifier-backend:latest
           '''
-        }
       }
     }
   }
