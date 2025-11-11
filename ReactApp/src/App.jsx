@@ -4,6 +4,7 @@ import { ToastContainer } from 'react-toastify';
 import Login from "./Login";
 import Signup from "./Signup";
 import Dashboard from "./Dashboard";
+import AddTask from "./AddTask";
 
 const App = () => {
   return (
@@ -21,6 +22,9 @@ const App = () => {
 
           {/* Dashboard page */}
           <Route path="/dashboard" element={<Dashboard />} />
+
+          {/* Add Task page */}
+          <Route path="/add-task" element={<AddTask />} />
 
           {/* Catch all - redirect to login */}
           <Route path="*" element={<Navigate to="/login" replace />} />

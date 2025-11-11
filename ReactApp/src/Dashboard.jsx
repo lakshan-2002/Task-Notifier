@@ -10,11 +10,6 @@ const Dashboard = () => {
   const [activePage, setActivePage] = useState('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const handleNavigate = (pageId) => {
-    setActivePage(pageId);
-    // Add navigation logic here if needed
-  };
-
   const handleLogout = () => {
     // Add logout logic here
     console.log('Logging out...');
@@ -26,7 +21,6 @@ const Dashboard = () => {
       <Sidebar 
         isOpen={isSidebarOpen}
         activePage={activePage}
-        onNavigate={handleNavigate}
         onLogout={handleLogout}
       />
 
@@ -60,7 +54,7 @@ const Dashboard = () => {
               />
             </div>
             <div className="user-info">
-              <div className="avatar">JD</div>
+              <div className="avatar">LI</div>
             </div>
           </div>
         </header>

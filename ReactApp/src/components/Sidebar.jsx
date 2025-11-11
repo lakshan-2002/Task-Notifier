@@ -1,14 +1,17 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Plus, ListTodo, CheckCircle, User, LogOut } from 'lucide-react';
 import './Sidebar.css';
 
-const Sidebar = ({ isOpen, activePage, onNavigate, onLogout }) => {
+const Sidebar = ({ isOpen, activePage, onLogout }) => {
+  const navigate = useNavigate();
+
   const navItems = [
-    { id: 'dashboard', name: 'Dashboard', icon: LayoutDashboard },
-    { id: 'add-task', name: 'Add Task', icon: Plus },
-    { id: 'all-tasks', name: 'All Tasks', icon: ListTodo },
-    { id: 'completed', name: 'Completed Tasks', icon: CheckCircle },
-    { id: 'profile', name: 'Profile', icon: User },
+    { id: 'dashboard', name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
+    { id: 'add-task', name: 'Add Task', icon: Plus, path: '/add-task' },
+    { id: 'all-tasks', name: 'All Tasks', icon: ListTodo, path: '/all-tasks' },
+    { id: 'completed', name: 'Completed Tasks', icon: CheckCircle, path: '/completed' },
+    { id: 'profile', name: 'Profile', icon: User, path: '/profile' },
   ];
 
   return (
@@ -23,7 +26,7 @@ const Sidebar = ({ isOpen, activePage, onNavigate, onLogout }) => {
           return (
             <button
               key={item.id}
-              onClick={() => onNavigate(item.id)}
+              onClick={() => navigate(item.path)}
               className={`nav-item ${activePage === item.id ? 'nav-item-active' : ''}`}
             >
               <Icon size={20} />
