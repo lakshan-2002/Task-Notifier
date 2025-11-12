@@ -73,7 +73,7 @@ pipeline {
                 )]) {
                     sh '''
                         echo $DH_PASS | docker login --username $DH_USER --password-stdin
-                        docker build -t lakshan2002/tasknotifier-backend:latest -f Dockerfile .
+                        docker build --platform linux/amd64 -t lakshan2002/tasknotifier-backend:latest -f Dockerfile .
                         docker push lakshan2002/tasknotifier-backend:latest
                         docker logout
                     '''
