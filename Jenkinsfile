@@ -12,29 +12,23 @@ pipeline {
           // Ensure full Git history is available
           sh '''
             git fetch --unshallow || true
-            git fetch origin main || git fetch origin master || true
+            git fetch origin master || true
           '''
 
-          // Determine the base branch dynamically
-          def baseBranch = sh(
-            script: "git branch -r | grep 'origin/main' >/dev/null && echo 'main' || echo 'master'",
-            returnStdout: true
-          ).trim()
-
-          // Get list of changed files
+          // Get list of changed files compared to master
           def changedFilesRaw = sh(
-            script: "git diff --name-only origin/${baseBranch}...HEAD || true",
+            script: "git diff --name-only origin/master...HEAD || true",
             returnStdout: true
           ).trim()
 
           def changedFiles = changedFilesRaw ? changedFilesRaw.split('\n') : []
           echo "Changed files: ${changedFiles}"
 
-          // Detect which service changed
+          // Detect changed folders
           def frontendChanged = changedFiles.any { it.startsWith('ReactApp/') }
           def backendChanged  = changedFiles.any { !it.startsWith('ReactApp/') && it != '' }
 
-          // Export to environment
+          // Store results in environment variables
           env.CHANGED_FRONTEND = frontendChanged.toString()
           env.CHANGED_BACKEND  = backendChanged.toString()
 
@@ -75,6 +69,15 @@ pipeline {
             docker logout
           '''
         }
+      }
+    }
+
+    stage('No Changes Detected') {
+      when {
+        expression { return env.CHANGED_FRONTEND != 'true' && env.CHANGED_BACKEND != 'true' }
+      }
+      steps {
+        echo 'No relevant changes detected. Skipping build and push.'
       }
     }
   }
