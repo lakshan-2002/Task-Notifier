@@ -9,23 +9,32 @@ pipeline {
     stage('Prepare') {
       steps {
         script {
-          // Fetch full Git history
-            sh 'git fetch --unshallow || true'
-            sh 'git fetch origin master'
+          // Ensure full Git history is available
+          sh '''
+            git fetch --unshallow || true
+            git fetch origin main || git fetch origin master || true
+          '''
 
-          // Define variables properly
+          // Determine the base branch dynamically
+          def baseBranch = sh(
+            script: "git branch -r | grep 'origin/main' >/dev/null && echo 'main' || echo 'master'",
+            returnStdout: true
+          ).trim()
+
+          // Get list of changed files
           def changedFilesRaw = sh(
-            script: "git diff --name-only origin/master...HEAD",
+            script: "git diff --name-only origin/${baseBranch}...HEAD || true",
             returnStdout: true
           ).trim()
 
           def changedFiles = changedFilesRaw ? changedFilesRaw.split('\n') : []
           echo "Changed files: ${changedFiles}"
 
-          def frontendChanged = changedFiles.any { it.contains('ReactApp/') }
-          def backendChanged  = changedFiles.any { !it.contains('ReactApp/') && it != '' }
+          // Detect which service changed
+          def frontendChanged = changedFiles.any { it.startsWith('ReactApp/') }
+          def backendChanged  = changedFiles.any { !it.startsWith('ReactApp/') && it != '' }
 
-          // Store results in environment variables
+          // Export to environment
           env.CHANGED_FRONTEND = frontendChanged.toString()
           env.CHANGED_BACKEND  = backendChanged.toString()
 
