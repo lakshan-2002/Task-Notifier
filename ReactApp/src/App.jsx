@@ -6,6 +6,7 @@ import Signup from "./Signup";
 import Dashboard from "./Dashboard";
 import AddTask from "./AddTask";
 import AllTasks from "./AllTasks";
+import CompletedTasks from "./CompletedTasks";
 
 const App = () => {
   return (
@@ -29,6 +30,9 @@ const App = () => {
 
           {/* All Tasks page */}
           <Route path="/all-tasks" element={<AllTasks />} />
+
+          {/* Completed Tasks page */}
+          <Route path="/completed-tasks" element={<CompletedTasks />} />
 
           {/* Catch all - redirect to login */}
           <Route path="*" element={<Navigate to="/login" replace />} />

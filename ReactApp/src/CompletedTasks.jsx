@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Search, Calendar, Flag, CheckCircle, Clock, Edit2, Trash2 } from 'lucide-react';
 import Sidebar from './components/Sidebar';
-import './AllTasks.css';
+import './CompletedTasks.css';
 
-const AllTasks = () => {
+const CompletedTasks = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [activePage, setActivePage] = useState('all-tasks');
+  const [activePage, setActivePage] = useState('completed-tasks');
   const [searchQuery, setSearchQuery] = useState('');
   const [filterPriority, setFilterPriority] = useState('all');
 
@@ -15,7 +15,7 @@ const AllTasks = () => {
       id: 1,
       title: 'Complete project documentation',
       description: 'Write comprehensive documentation for the new feature implementation including API endpoints and user guides.',
-      status: 'pending',
+      status: 'completed',
       priority: 'high',
       dueDate: '2024-12-20'
     },
@@ -31,7 +31,7 @@ const AllTasks = () => {
       id: 3,
       title: 'Update dependencies',
       description: 'Update all npm packages to their latest stable versions and test for compatibility.',
-      status: 'pending',
+      status: 'completed',
       priority: 'low',
       dueDate: '2024-12-25'
     },
@@ -39,7 +39,7 @@ const AllTasks = () => {
       id: 4,
       title: 'Fix critical bug in authentication',
       description: 'Investigate and fix the bug causing users to be logged out unexpectedly.',
-      status: 'pending',
+      status: 'completed',
       priority: 'high',
       dueDate: '2024-12-18'
     },
@@ -55,7 +55,7 @@ const AllTasks = () => {
       id: 6,
       title: 'Setup CI/CD pipeline',
       description: 'Configure automated testing and deployment pipeline for the project.',
-      status: 'pending',
+      status: 'completed',
       priority: 'high',
       dueDate: '2024-12-22'
     }
@@ -141,7 +141,7 @@ const AllTasks = () => {
                 <span></span>
               </div>  
             </button>
-            <h1 className="page-title">All Tasks</h1>
+            <h1 className="page-title">Completed Tasks</h1>
           </div>
           
           <div className="header-right">
@@ -258,4 +258,4 @@ const AllTasks = () => {
   );
 };
 
-export default AllTasks;
+export default CompletedTasks;
