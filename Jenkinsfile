@@ -9,24 +9,17 @@ pipeline {
     stage('Prepare') {
       steps {
         script {
-          // Ensure full Git history is available
-          sh '''
-            git fetch --unshallow || true
-            git fetch origin master || true
-          '''
-
-          // Get list of changed files compared to master
+          // Define variables properly
           def changedFilesRaw = sh(
-            script: "git diff --name-only origin/master...HEAD || true",
+            script: "git diff --name-only HEAD~1 HEAD || true",
             returnStdout: true
           ).trim()
 
           def changedFiles = changedFilesRaw ? changedFilesRaw.split('\n') : []
           echo "Changed files: ${changedFiles}"
 
-          // Detect changed folders
-          def frontendChanged = changedFiles.any { it.startsWith('ReactApp/') }
-          def backendChanged  = changedFiles.any { !it.startsWith('ReactApp/') && it != '' }
+          def frontendChanged = changedFiles.any { it.contains('ReactApp/') }
+          def backendChanged  = changedFiles.any { !it.contains('ReactApp/') && it != '' }
 
           // Store results in environment variables
           env.CHANGED_FRONTEND = frontendChanged.toString()
@@ -64,20 +57,11 @@ pipeline {
         withCredentials([usernamePassword(credentialsId: "${DOCKERHUB_CREDS}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
           sh '''
             echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-            docker buildx build --platform linux/amd64 -t lakshan2002/tasknotifier-backend:latest .
+            docker build -t lakshan2002/tasknotifier-backend:latest -f Dockerfile .
             docker push lakshan2002/tasknotifier-backend:latest
             docker logout
           '''
         }
-      }
-    }
-
-    stage('No Changes Detected') {
-      when {
-        expression { return env.CHANGED_FRONTEND != 'true' && env.CHANGED_BACKEND != 'true' }
-      }
-      steps {
-        echo 'No relevant changes detected. Skipping build and push.'
       }
     }
   }
