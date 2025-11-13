@@ -9,25 +9,31 @@ pipeline {
     stage('Prepare') {
       steps {
         script {
-          // Get list of changed files from the last commit
-          CHANGED_FILES = sh(
+          // Define variables properly
+          def changedFilesRaw = sh(
             script: "git diff --name-only HEAD~1 HEAD || true",
             returnStdout: true
-          ).trim().split('\n')
+          ).trim()
 
-          echo "Changed files: ${CHANGED_FILES}"
+          def changedFiles = changedFilesRaw ? changedFilesRaw.split('\n') : []
+          echo "Changed files: ${changedFiles}"
 
-          CHANGED_FRONTEND = CHANGED_FILES.any { it.startsWith('ReactApp/') }
-          CHANGED_BACKEND  = CHANGED_FILES.any { 
-            !it.startsWith('ReactApp/') && it != ''
-          }
+          def frontendChanged = changedFiles.any { it.contains('ReactApp/') }
+          def backendChanged  = changedFiles.any { !it.contains('ReactApp/') && it != '' }
+
+          // Store results in environment variables
+          env.CHANGED_FRONTEND = frontendChanged.toString()
+          env.CHANGED_BACKEND  = backendChanged.toString()
+
+          echo "Frontend changed: ${env.CHANGED_FRONTEND}"
+          echo "Backend changed: ${env.CHANGED_BACKEND}"
         }
       }
     }
 
     stage('Build and Push Frontend') {
       when {
-        expression { return CHANGED_FRONTEND }
+        expression { return env.CHANGED_FRONTEND == 'true' }
       }
       steps {
         dir('ReactApp') {
@@ -45,13 +51,13 @@ pipeline {
 
     stage('Build and Push Backend') {
       when {
-        expression { return CHANGED_BACKEND }
+        expression { return env.CHANGED_BACKEND == 'true' }
       }
       steps {
         withCredentials([usernamePassword(credentialsId: "${DOCKERHUB_CREDS}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
           sh '''
             echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-            docker build -t lakshan2002/tasknotifier-backend:latest -f Dockerfile .
+            docker buildx build --platform linux/amd64 -t lakshan2002/tasknotifier-backend:latest .
             docker push lakshan2002/tasknotifier-backend:latest
             docker logout
           '''
