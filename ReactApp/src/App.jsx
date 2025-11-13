@@ -35,7 +35,7 @@ const App = () => {
           <Route path="/completed-tasks" element={<CompletedTasks />} />
 
           {/* Profile page */}
-          <Route path="/profile" element={<div>Under the construction</div>} />
+          <Route path="/profile" element={<div>Profile page is Under the construction</div>} />
 
           {/* Catch all - redirect to login */}
           <Route path="*" element={<Navigate to="/login" replace />} />
