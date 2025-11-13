@@ -77,7 +77,6 @@ const AllTasks = () => {
   const handleDelete = (taskId) => {
     if (window.confirm('Are you sure you want to delete this task?')) {
       setTasks(tasks.filter(task => task.id !== taskId));
-      console.log('Deleted task:', taskId);
       // Add your delete API call here
     }
   };
