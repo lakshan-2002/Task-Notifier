@@ -9,9 +9,13 @@ pipeline {
     stage('Prepare') {
       steps {
         script {
+          // Fetch full Git history
+            sh 'git fetch --unshallow || true'
+            sh 'git fetch origin master'
+
           // Define variables properly
           def changedFilesRaw = sh(
-            script: "git diff --name-only HEAD~1 HEAD || true",
+            script: "git diff --name-only origin/master...HEAD",
             returnStdout: true
           ).trim()
 
