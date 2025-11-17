@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Search, Calendar, Flag, CheckCircle, Clock, Edit2, Trash2 } from 'lucide-react';
 import Sidebar from './components/Sidebar';
+import EditTask from './components/EditTask';
 import './CompletedTasks.css';
 
 const CompletedTasks = () => {
@@ -9,6 +10,9 @@ const CompletedTasks = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterPriority, setFilterPriority] = useState('all');
 
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  
   // Sample tasks data
   const [tasks, setTasks] = useState([
     {
@@ -69,9 +73,22 @@ const CompletedTasks = () => {
     console.log('Logging out...');
   };
 
-  const handleEdit = (taskId) => {
-    console.log('Editing task:', taskId);
-    // Add your edit logic here - navigate to edit page or open modal
+  const handleEdit = (task) => {
+    setSelectedTask(task);
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveEdit = (updatedTask) => {
+    setTasks(tasks.map(task => 
+      task.id === updatedTask.id ? updatedTask : task
+    ));
+    console.log('Task updated:', updatedTask);
+    // Add your update API call here
+  };
+
+  const handleCloseModal = () => {
+    setIsEditModalOpen(false);
+    setSelectedTask(null);
   };
 
   const handleDelete = (taskId) => {
@@ -236,7 +253,7 @@ const CompletedTasks = () => {
                 <div className="task-actions-bottom">
                   <button 
                     className="action-btn-bottom edit-btn-bottom"
-                    onClick={() => handleEdit(task.id)}
+                    onClick={() => handleEdit(task)}
                   >
                     <Edit2 size={16} />
                     Edit
@@ -254,6 +271,15 @@ const CompletedTasks = () => {
           )}
         </div>
       </main>
+
+      {/* Edit Task Modal */}
+      <EditTask
+        task={selectedTask}
+        isOpen={isEditModalOpen}
+        onClose={handleCloseModal}
+        onSave={handleSaveEdit}
+      />
+
     </div>
   );
 };
