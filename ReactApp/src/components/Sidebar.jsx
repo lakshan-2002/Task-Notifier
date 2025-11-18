@@ -10,7 +10,7 @@ const Sidebar = ({ isOpen, activePage, onLogout }) => {
     { id: 'dashboard', name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
     { id: 'add-task', name: 'Add Task', icon: Plus, path: '/add-task' },
     { id: 'all-tasks', name: 'All Tasks', icon: ListTodo, path: '/all-tasks' },
-    { id: 'completed', name: 'Completed Tasks', icon: CheckCircle, path: '/completed' },
+    { id: 'completed', name: 'Completed Tasks', icon: CheckCircle, path: '/completed-tasks' },
     { id: 'profile', name: 'Profile', icon: User, path: '/profile' },
   ];
 
