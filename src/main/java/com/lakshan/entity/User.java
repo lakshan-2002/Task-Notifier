@@ -1,5 +1,7 @@
 package com.lakshan.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import jakarta.persistence.*;
 
 @Entity
@@ -17,6 +19,7 @@ public class User {
     private String email;
 
     @Column(name = "password")
+    @JsonProperty(access = Access.WRITE_ONLY)
     private String password;
 
     public int getId() {
