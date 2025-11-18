@@ -10,14 +10,14 @@ const Profile = () => {
   
   // Profile state
   const [profileData, setProfileData] = useState({
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john.doe@example.com',
-    phone: '+1 (555) 123-4567',
-    address: '123 Main Street, New York, NY 10001',
-    dateOfBirth: '1990-05-15',
-    occupation: 'Software Developer',
-    bio: 'Passionate software developer with 5+ years of experience in building web applications.',
+    firstName: 'Lakshan',
+    lastName: 'Imantha',
+    email: 'lakshan.imantha02@gmail.com',
+    phone: '0702294900',
+    address: 'No 301/3, Kanampitiya Road, Galle',
+    dateOfBirth: '2002-10-02',
+    occupation: 'Backend Developer',
+    bio: 'Backend developer and a Java enthusiast. Passionate about building scalable web applications and enjoy working with Java and Spring Boot.',
     profileImage: null
   });
 
