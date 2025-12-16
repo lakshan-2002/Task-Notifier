@@ -64,7 +64,7 @@ function login() {
         navigate("/dashboard");
       } catch (error) {
         console.error("Login error:", error.response.data);
-        toast.error(error.response.data.message || "Login failed. Please try again.", {
+        toast.error(error.response.data, {
           className: "my-error-toast"
         });
       }

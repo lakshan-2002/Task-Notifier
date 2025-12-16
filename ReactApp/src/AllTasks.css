@@ -273,36 +273,132 @@ body, html, #root {
   line-height: 1.4;
 }
 
-/* Priority Badge Container */
-.priority-badge-container {
-  margin-bottom: 4px;
+/* Date Filter Section */
+.date-filter-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
-/* Priority Badge */
-.priority-badge {
+.date-filter-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.date-filter-buttons {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.date-filter-btn {
+  position: relative;
+  padding: 8px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+  background-color: #f9fafb;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.date-filter-btn:hover {
+  border-color: #3b82f6;
+  color: #3b82f6;
+  background-color: #eff6ff;
+}
+
+.date-filter-overdue:hover {
+  border-color: #ef4444;
+  color: #ef4444;
+  background-color: #fef2f2;
+}
+
+.date-filter-today:hover {
+  border-color: #f59e0b;
+  color: #f59e0b;
+  background-color: #fffbeb;
+}
+
+.date-filter-upcoming:hover {
+  border-color: #10b981;
+  color: #10b981;
+  background-color: #f0fdf4;
+}
+
+.date-filter-active {
+  color: #ffffff !important;
+  border-color: #3b82f6 !important;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+}
+
+.date-filter-overdue.date-filter-active {
+  border-color: #ef4444 !important;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+}
+
+.date-filter-today.date-filter-active {
+  border-color: #f59e0b !important;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+}
+
+.date-filter-upcoming.date-filter-active {
+  border-color: #10b981 !important;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+}
+
+.count-badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border-radius: 8px;
-  font-size: 12px;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  background-color: rgba(255, 255, 255, 0.9);
+  color: inherit;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.date-filter-active .count-badge {
+  background-color: rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+}
+
+/* Overdue Date Styling */
+.overdue-date {
+  color: #ef4444 !important;
   font-weight: 600;
-  text-transform: capitalize;
 }
 
-.priority-high {
-  background-color: #fee2e2;
-  color: #dc2626;
+.overdue-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #ef4444;
+  margin-left: 6px;
 }
 
-.priority-medium {
-  background-color: #fef3c7;
-  color: #d97706;
-}
-
-.priority-low {
-  background-color: #dbeafe;
-  color: #2563eb;
+/* Update existing filter-section margin */
+.filter-section {
+  margin-bottom: 32px;
 }
 
 /* Task Description */

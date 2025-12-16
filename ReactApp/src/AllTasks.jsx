@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Calendar, Flag, CheckCircle, Clock, Edit2, Trash2 } from 'lucide-react';
+import { Search, Calendar, Flag, CheckCircle, Clock, Edit2, Trash2, Filter } from 'lucide-react';
 import Sidebar from './components/Sidebar';
 import EditTask from './components/EditTask';
 import './AllTasks.css';
@@ -9,11 +9,13 @@ const AllTasks = () => {
   const [activePage, setActivePage] = useState('all-tasks');
   const [searchQuery, setSearchQuery] = useState('');
   const [filterPriority, setFilterPriority] = useState('all');
-
+  const [filterDate, setFilterDate] = useState('all'); // New date filter state
+  
+  // Modal state
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
 
-  // Sample tasks data
+  // Sample tasks data with various dates
   const [tasks, setTasks] = useState([
     {
       id: 1,
@@ -37,7 +39,7 @@ const AllTasks = () => {
       description: 'Update all npm packages to their latest stable versions and test for compatibility.',
       status: 'pending',
       priority: 'low',
-      dueDate: '2024-12-25'
+      dueDate: '2025-01-15'
     },
     {
       id: 4,
@@ -45,7 +47,7 @@ const AllTasks = () => {
       description: 'Investigate and fix the bug causing users to be logged out unexpectedly.',
       status: 'pending',
       priority: 'high',
-      dueDate: '2024-12-18'
+      dueDate: new Date().toISOString().split('T')[0] // Today
     },
     {
       id: 5,
@@ -61,7 +63,15 @@ const AllTasks = () => {
       description: 'Configure automated testing and deployment pipeline for the project.',
       status: 'pending',
       priority: 'high',
-      dueDate: '2024-12-22'
+      dueDate: '2024-12-15'
+    },
+    {
+      id: 7,
+      title: 'Write unit tests',
+      description: 'Add comprehensive unit tests for the new features.',
+      status: 'pending',
+      priority: 'medium',
+      dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] // 2 days from now
     }
   ]);
 
@@ -83,7 +93,6 @@ const AllTasks = () => {
       task.id === updatedTask.id ? updatedTask : task
     ));
     console.log('Task updated:', updatedTask);
-    // Add your update API call here
   };
 
   const handleCloseModal = () => {
@@ -94,9 +103,64 @@ const AllTasks = () => {
   const handleDelete = (taskId) => {
     if (window.confirm('Are you sure you want to delete this task?')) {
       setTasks(tasks.filter(task => task.id !== taskId));
-      // Add your delete API call here
+      console.log('Deleted task:', taskId);
     }
   };
+
+  // Date filtering logic
+  const filterTasksByDate = (task) => {
+    if (filterDate === 'all') return true;
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const taskDate = new Date(task.dueDate);
+    taskDate.setHours(0, 0, 0, 0);
+    
+    const diffTime = taskDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    switch (filterDate) {
+      case 'overdue':
+        return diffDays < 0 && task.status !== 'completed';
+      case 'today':
+        return diffDays === 0;
+      case 'upcoming':
+        return diffDays > 0;
+      default:
+        return true;
+    }
+  };
+
+  // Count tasks by date category
+  const getDateCounts = () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    let overdue = 0;
+    let todayCount = 0;
+    let upcoming = 0;
+    
+    tasks.forEach(task => {
+      const taskDate = new Date(task.dueDate);
+      taskDate.setHours(0, 0, 0, 0);
+      
+      const diffTime = taskDate.getTime() - today.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      if (diffDays < 0 && task.status !== 'completed') {
+        overdue++;
+      } else if (diffDays === 0) {
+        todayCount++;
+      } else if (diffDays > 0) {
+        upcoming++;
+      }
+    });
+    
+    return { overdue, today: todayCount, upcoming };
+  };
+
+  const dateCounts = getDateCounts();
 
   // Filter tasks based on priority
   const filteredTasks = tasks.filter(task => {
@@ -104,8 +168,11 @@ const AllTasks = () => {
     return task.priority === filterPriority;
   });
 
+  // Filter by date
+  const dateFilteredTasks = filteredTasks.filter(filterTasksByDate);
+
   // Further filter by search query
-  const searchedTasks = filteredTasks.filter(task => 
+  const searchedTasks = dateFilteredTasks.filter(task => 
     task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     task.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -134,6 +201,15 @@ const AllTasks = () => {
       day: 'numeric', 
       year: 'numeric' 
     });
+  };
+
+  const isOverdue = (dueDate, status) => {
+    if (status === 'completed') return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const taskDate = new Date(dueDate);
+    taskDate.setHours(0, 0, 0, 0);
+    return taskDate < today;
   };
 
   return (
@@ -173,38 +249,41 @@ const AllTasks = () => {
               />
             </div>
             <div className="user-info">
-              <div className="avatar">LI</div>
+              <div className="avatar">JD</div>
             </div>
           </div>
         </header>
 
-        {/* Filter Section */}
-        <div className="filter-section">
-          <div className="filter-label">Filter by Priority:</div>
-          <div className="filter-buttons">
+        {/* Date Filter Section */}
+        <div className="date-filter-section">
+          <div className="date-filter-label">
+            <Filter size={18} />
+            Filter by Date:
+          </div>
+          <div className="date-filter-buttons">
             <button 
-              className={`filter-btn ${filterPriority === 'all' ? 'filter-active' : ''}`}
-              onClick={() => setFilterPriority('all')}
+              className={`date-filter-btn ${filterDate === 'all' ? 'date-filter-active' : ''}`}
+              onClick={() => setFilterDate('all')}
             >
               All
             </button>
             <button 
-              className={`filter-btn ${filterPriority === 'high' ? 'filter-active' : ''}`}
-              onClick={() => setFilterPriority('high')}
+              className={`date-filter-btn date-filter-overdue ${filterDate === 'overdue' ? 'date-filter-active' : ''}`}
+              onClick={() => setFilterDate('overdue')}
             >
-              High
+              Overdue {dateCounts.overdue > 0 && <span className="count-badge">{dateCounts.overdue}</span>}
             </button>
             <button 
-              className={`filter-btn ${filterPriority === 'medium' ? 'filter-active' : ''}`}
-              onClick={() => setFilterPriority('medium')}
+              className={`date-filter-btn date-filter-today ${filterDate === 'today' ? 'date-filter-active' : ''}`}
+              onClick={() => setFilterDate('today')}
             >
-              Medium
+              Today {dateCounts.today > 0 && <span className="count-badge">{dateCounts.today}</span>}
             </button>
             <button 
-              className={`filter-btn ${filterPriority === 'low' ? 'filter-active' : ''}`}
-              onClick={() => setFilterPriority('low')}
+              className={`date-filter-btn date-filter-upcoming ${filterDate === 'upcoming' ? 'date-filter-active' : ''}`}
+              onClick={() => setFilterDate('upcoming')}
             >
-              Low
+              Upcoming {dateCounts.upcoming > 0 && <span className="count-badge">{dateCounts.upcoming}</span>}
             </button>
           </div>
         </div>
@@ -242,14 +321,14 @@ const AllTasks = () => {
                       {task.status}
                     </span>
                     
-                    <span className="due-date">
+                    <span className={`due-date ${isOverdue(task.dueDate, task.status) ? 'overdue-date' : ''}`}>
                       <Calendar size={16} />
                       {formatDate(task.dueDate)}
+                      {isOverdue(task.dueDate, task.status) && <span className="overdue-label">Overdue</span>}
                     </span>
                   </div>
                 </div>
 
-                {/* Action Buttons at Bottom */}
                 <div className="task-actions-bottom">
                   <button 
                     className="action-btn-bottom edit-btn-bottom"
@@ -272,14 +351,12 @@ const AllTasks = () => {
         </div>
       </main>
 
-      {/* Edit Task Modal */}
-      <EditTask
+      <EditTask 
         task={selectedTask}
         isOpen={isEditModalOpen}
         onClose={handleCloseModal}
         onSave={handleSaveEdit}
       />
-
     </div>
   );
 };
