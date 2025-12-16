@@ -35,19 +35,19 @@ public class UserService {
         if(userRepository.existsById(user.getId()))
             userRepository.save(user);
         else
-            throw new RuntimeException("User not found with id: " + user.getId());
+            throw new IllegalArgumentException("User not found with id: " + user.getId());
     }
 
     public void deleteUser(int id){
         if(userRepository.existsById(id))
             userRepository.deleteById(id);
         else
-            throw new RuntimeException("User not found with id: " + id);
+            throw new IllegalArgumentException("User not found with id: " + id);
     }
 
     public User getUserByEmail(String email) {
         return userRepository.findByEmail(email).orElseThrow(() ->
-                new RuntimeException("User not found with email: " + email)
+                new IllegalArgumentException("User not found with email: " + email)
         );
 
     }
