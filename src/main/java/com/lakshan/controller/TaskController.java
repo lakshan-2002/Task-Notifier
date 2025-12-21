@@ -31,6 +31,11 @@ public class TaskController {
         return taskService.getAllTasks();
     }
 
+    @GetMapping("/getTasksByUserId/{userId}")
+    public List<Task> getTasksByUserId(@PathVariable int userId) {
+        return taskService.getTasksByUserId(userId);
+    }
+
     @GetMapping("/getTask/{id}")
     public Task getTaskById(@PathVariable int id){
         return taskService.getTaskById(id);
