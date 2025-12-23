@@ -35,17 +35,18 @@ public class TaskService {
     }
 
     public List<Task> getTasksByUserId(int userId) {
-        if (!(taskRepository.findByUserId(userId).isEmpty())) {
-            getEmailDetails(userId);
-            return taskRepository.findByUserId(userId);
-        } else
+        List<Task> tasks = taskRepository.findByUserId(userId);
+        if(tasks.isEmpty())
             throw new IllegalArgumentException("No tasks found for user with id: " + userId);
+
+        List<Task> tasksDueToday = filterTasksDueToday(tasks, LocalDate.now());
+        if(!tasksDueToday.isEmpty())
+            getEmailDetails(userId, tasksDueToday);
+
+        return tasks;
     }
 
-    private void getEmailDetails(int userId) {
-        LocalDate today = LocalDate.now();
-        List<Task> tasksDueToday = taskRepository.findByDueDate(today);
-
+    private void getEmailDetails(int userId, List<Task> tasksDueToday) {
         String recipientEmail = userRepository.findById(userId).orElseThrow(() ->
                 new IllegalArgumentException("User not found with id: " + userId)
         ).getEmail();
@@ -54,6 +55,12 @@ public class TaskService {
         String finalBody = getFullBody(tasksDueToday);
 
         emailService.sendEmail(recipientEmail, subject, finalBody);
+    }
+
+    private List<Task> filterTasksDueToday(List<Task> tasks, LocalDate date) {
+        return tasks.stream()
+                .filter(t -> date.equals(t.getDueDate()))
+                .toList();
     }
 
     private String getFullBody(List<Task> tasksDueToday) {
@@ -74,11 +81,6 @@ public class TaskService {
         return taskRepository.findById(id).orElseThrow(() ->
                 new IllegalArgumentException("Task not found with id: " + id)
         );
-    }
-
-    public List<Task> getTasksByDueDate(String dueDate) {
-        LocalDate date = LocalDate.parse(dueDate);
-        return taskRepository.findByDueDate(date);
     }
 
     public void updateTask(Task task) {
