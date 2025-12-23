@@ -2,20 +2,27 @@ package com.lakshan.service;
 
 import com.lakshan.entity.Task;
 import com.lakshan.repository.TaskRepository;
+import com.lakshan.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
 public class TaskService {
 
     private final TaskRepository taskRepository;
+    private final UserRepository userRepository;
     private final EmailService emailService;
 
     @Autowired
-    public TaskService(TaskRepository taskRepository, EmailService emailService) {
+    public TaskService(TaskRepository taskRepository,
+                       UserRepository userRepository,
+                       EmailService emailService
+    ) {
         this.taskRepository = taskRepository;
+        this.userRepository = userRepository;
         this.emailService = emailService;
     }
 
@@ -28,16 +35,50 @@ public class TaskService {
     }
 
     public List<Task> getTasksByUserId(int userId) {
-        if (!(taskRepository.findByUserId(userId).isEmpty()))
+        if (!(taskRepository.findByUserId(userId).isEmpty())) {
+            getEmailDetails(userId);
             return taskRepository.findByUserId(userId);
-        else
+        } else
             throw new IllegalArgumentException("No tasks found for user with id: " + userId);
+    }
+
+    private void getEmailDetails(int userId) {
+        LocalDate today = LocalDate.now();
+        List<Task> tasksDueToday = taskRepository.findByDueDate(today);
+
+        String recipientEmail = userRepository.findById(userId).orElseThrow(() ->
+                new IllegalArgumentException("User not found with id: " + userId)
+        ).getEmail();
+
+        String subject = "Tasks Due Today Reminder";
+        String finalBody = getFullBody(tasksDueToday);
+
+        emailService.sendEmail(recipientEmail, subject, finalBody);
+    }
+
+    private String getFullBody(List<Task> tasksDueToday) {
+        StringBuilder body = new StringBuilder();
+        for (Task task : tasksDueToday) {
+            body.append("Title: ").append(task.getTitle()).append("\n")
+                    .append("Description: ").append(task.getDescription()).append("\n")
+                    .append("Priority: ").append(task.getPriority()).append("\n\n");
+        }
+
+        return "Dear User,\n\nThis is a reminder that the following tasks are due today:\n\n"
+                + body +
+                "\nPlease make sure to complete them on time." +
+                "\n\nBest regards,\nTaskNotifier System";
     }
 
     public Task getTaskById(int id) {
         return taskRepository.findById(id).orElseThrow(() ->
                 new IllegalArgumentException("Task not found with id: " + id)
         );
+    }
+
+    public List<Task> getTasksByDueDate(String dueDate) {
+        LocalDate date = LocalDate.parse(dueDate);
+        return taskRepository.findByDueDate(date);
     }
 
     public void updateTask(Task task) {
