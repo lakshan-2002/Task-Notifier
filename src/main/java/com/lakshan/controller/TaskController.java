@@ -41,6 +41,11 @@ public class TaskController {
         return taskService.getTaskById(id);
     }
 
+    @GetMapping("/getTasksByDueDate/{dueDate}")
+    public List<Task> getTasksByDueDate(@PathVariable String dueDate){
+        return taskService.getTasksByDueDate(dueDate);
+    }
+
     @PutMapping("/updateTask")
     public ResponseEntity<Task> updateTask(@RequestBody Task task){
         taskService.updateTask(task);
