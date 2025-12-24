@@ -36,14 +36,20 @@ public class TaskService {
 
     public List<Task> getTasksByUserId(int userId) {
         List<Task> tasks = taskRepository.findByUserId(userId);
-        if(tasks.isEmpty())
+        if (tasks.isEmpty())
             throw new IllegalArgumentException("No tasks found for user with id: " + userId);
 
         List<Task> tasksDueToday = filterTasksDueToday(tasks, LocalDate.now());
-        if(!tasksDueToday.isEmpty())
+        if (!tasksDueToday.isEmpty())
             getEmailDetails(userId, tasksDueToday);
 
         return tasks;
+    }
+
+    private List<Task> filterTasksDueToday(List<Task> tasks, LocalDate date) {
+        return tasks.stream()
+                .filter(t -> date.equals(t.getDueDate()))
+                .toList();
     }
 
     private void getEmailDetails(int userId, List<Task> tasksDueToday) {
@@ -57,11 +63,6 @@ public class TaskService {
         emailService.sendEmail(recipientEmail, subject, finalBody);
     }
 
-    private List<Task> filterTasksDueToday(List<Task> tasks, LocalDate date) {
-        return tasks.stream()
-                .filter(t -> date.equals(t.getDueDate()))
-                .toList();
-    }
 
     private String getFullBody(List<Task> tasksDueToday) {
         StringBuilder body = new StringBuilder();
