@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
+
 @Entity
 @Table(name = "tasks")
 @NoArgsConstructor
@@ -31,7 +33,7 @@ public class Task {
     private String priority;
 
     @Column(name = "due_date")
-    private String dueDate;
+    private LocalDate dueDate;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -77,11 +79,11 @@ public class Task {
         this.priority = priority;
     }
 
-    public String getDueDate() {
+    public LocalDate getDueDate() {
         return dueDate;
     }
 
-    public void setDueDate(String dueDate) {
+    public void setDueDate(LocalDate dueDate) {
         this.dueDate = dueDate;
     }
 

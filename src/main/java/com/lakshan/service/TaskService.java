@@ -17,31 +17,38 @@ public class TaskService {
         this.taskRepository = taskRepository;
     }
 
-    public void addNewTask(Task task){
+    public void addNewTask(Task task) {
         taskRepository.save(task);
     }
 
-    public List<Task> getAllTasks(){
+    public List<Task> getAllTasks() {
         return taskRepository.findAll();
     }
 
-    public Task getTaskById(int id){
+    public List<Task> getTasksByUserId(int userId) {
+        if (!(taskRepository.findByUserId(userId).isEmpty()))
+            return taskRepository.findByUserId(userId);
+        else
+            throw new IllegalArgumentException("No tasks found for user with id: " + userId);
+    }
+
+    public Task getTaskById(int id) {
         return taskRepository.findById(id).orElseThrow(() ->
-                new RuntimeException("Task not found with id: " + id)
+                new IllegalArgumentException("Task not found with id: " + id)
         );
     }
 
-    public void updateTask(Task task){
-        if(taskRepository.existsById(task.getId()))
+    public void updateTask(Task task) {
+        if (taskRepository.existsById(task.getId()))
             taskRepository.save(task);
         else
-            throw new RuntimeException("Task not found with id: " + task.getId());
+            throw new IllegalArgumentException("Task not found with id: " + task.getId());
     }
 
-    public void deleteTask(int id){
-        if(taskRepository.existsById(id))
+    public void deleteTask(int id) {
+        if (taskRepository.existsById(id))
             taskRepository.deleteById(id);
         else
-            throw new RuntimeException("Task not found with id: " + id);
+            throw new IllegalArgumentException("Task not found with id: " + id);
     }
 }
