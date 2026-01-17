@@ -249,7 +249,7 @@ const AllTasks = () => {
               />
             </div>
             <div className="user-info">
-              <div className="avatar">JD</div>
+              <div className="avatar">LI</div>
             </div>
           </div>
         </header>
