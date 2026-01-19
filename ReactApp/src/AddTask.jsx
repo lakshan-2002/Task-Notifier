@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import Sidebar from './components/Sidebar';
 import './AddTask.css';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const AddTask = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -14,6 +16,11 @@ const AddTask = () => {
     priority: 'medium',
     dueDate: ''
   });
+
+  // UI state
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
 
   const handleNavigate = (pageId) => {
     setActivePage(pageId);
@@ -30,12 +37,48 @@ const AddTask = () => {
       ...prev,
       [name]: value
     }));
+    // Clear messages when user starts typing
+    if (error) setError(null);
+    if (successMessage) setSuccessMessage(null);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
-    // Add your form submission logic here
+    setIsLoading(true);
+    setError(null);
+    setSuccessMessage(null);
+
+    try {
+      const API_URL = 'http://localhost:8080/tasks/addTask';
+
+      const user = JSON.parse(localStorage.getItem('user'));
+
+      const response = await axios.post(API_URL, {
+        title: formData.title,
+        description: formData.description,
+        status: formData.status,
+        priority: formData.priority,
+        dueDate: formData.dueDate,
+        user: user
+      });
+
+      setSuccessMessage('Task added successfully!');
+      toast.success('Task added successfully!');
+      
+      handleReset();
+
+      setTimeout(() => {
+        setSuccessMessage(null);
+      }, 3000);
+
+    } catch (err) {
+      console.error('Error adding task:', err);
+      const errorMessage = err.response?.data?.message || err.message || 'An error occurred while adding the task';
+      setError(errorMessage);
+      toast.error("Error adding task");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleReset = () => {
@@ -46,6 +89,8 @@ const AddTask = () => {
       priority: 'medium',
       dueDate: ''
     });
+    setError(null);
+    setSuccessMessage(null);
   };
 
   return (
@@ -85,6 +130,22 @@ const AddTask = () => {
 
         {/* Form Container */}
         <div className="addtask-form-container">
+          {/* Error Message */}
+          {error && (
+            <div className="alert alert-error">
+              <span className="alert-icon">⚠️</span>
+              <span>{error}</span>
+            </div>
+          )}
+
+          {/* Success Message */}
+          {successMessage && (
+            <div className="alert alert-success">
+              <span className="alert-icon">✓</span>
+              <span>{successMessage}</span>
+            </div>
+          )}
+
           <form className="task-form" onSubmit={handleSubmit}>
             {/* Title Field */}
             <div className="addtask-form-group">
@@ -178,8 +239,12 @@ const AddTask = () => {
 
             {/* Form Actions */}
             <div className="addtask-form-actions">
-              <button type="submit" className="btn-submit">
-                Submit
+              <button 
+                type="submit" 
+                className="btn-submit"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Submitting...' : 'Submit'}
               </button>
             </div>
           </form>

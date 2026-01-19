@@ -2,12 +2,12 @@ import React from 'react';
 import { ListTodo, LayoutDashboard, CheckCircle } from 'lucide-react';
 import './OverviewCards.css';
 
-const OverviewCards = () => {
+const OverviewCards = ({ allTasks = 0, pendingTasks = 0, completedTasks = 0, isLoading = false }) => {
   const cardsData = [
     {
       id: 1,
       title: 'All Tasks',
-      value: 65,
+      value: allTasks,
       trend: '↑ 12% from last week',
       icon: ListTodo,
       colorClass: 'card-blue'
@@ -15,7 +15,7 @@ const OverviewCards = () => {
     {
       id: 2,
       title: 'Pending Tasks',
-      value: 28,
+      value: pendingTasks,
       trend: '↓ 5% from last week',
       icon: LayoutDashboard,
       colorClass: 'card-orange'
@@ -23,7 +23,7 @@ const OverviewCards = () => {
     {
       id: 3,
       title: 'Completed Tasks',
-      value: 37,
+      value: completedTasks,
       trend: '↑ 18% from last week',
       icon: CheckCircle,
       colorClass: 'card-green'
@@ -41,7 +41,9 @@ const OverviewCards = () => {
             </div>
             <div className="card-content">
               <p className="card-label">{card.title}</p>
-              <h3 className="card-value">{card.value}</h3>
+              <h3 className="card-value">
+                {isLoading ? '...' : card.value}
+              </h3>
               <p className="card-trend">{card.trend}</p>
             </div>
           </div>
