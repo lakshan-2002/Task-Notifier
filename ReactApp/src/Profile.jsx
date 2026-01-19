@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Search, Camera, User, Mail, Phone, MapPin, Calendar, Briefcase } from 'lucide-react';
 import Sidebar from './components/Sidebar';
+import { toast } from 'react-toastify';
 import './Profile.css';
 
 const Profile = () => {
+  const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [activePage, setActivePage] = useState('profile');
   const [searchQuery, setSearchQuery] = useState('');
@@ -29,7 +32,9 @@ const Profile = () => {
   };
 
   const handleLogout = () => {
-    console.log('Logging out...');
+    localStorage.removeItem('user');
+    toast.success('Logged out successfully!');
+    navigate('/login');
   };
 
   const handleInputChange = (e) => {

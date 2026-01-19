@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Search, Calendar, Flag, CheckCircle, Clock, Edit2, Trash2, Filter } from 'lucide-react';
 import Sidebar from './components/Sidebar';
 import EditTask from './components/EditTask';
@@ -7,6 +8,7 @@ import { toast } from 'react-toastify';
 import './AllTasks.css';
 
 const AllTasks = () => {
+  const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [activePage, setActivePage] = useState('all-tasks');
   const [searchQuery, setSearchQuery] = useState('');
@@ -36,7 +38,7 @@ const AllTasks = () => {
     try {
       setIsLoading(true);
       setError(null);
-      const response = await axios.get(`${API_URL}/getTasksByUserId/${user.id}`);
+      const response = await axios.get(`${API_URL}/${user.id}`);
       console.log('Sample task - status:', response.data[0]?.status, 'priority:', response.data[0]?.priority);
       setTasks(response.data);
     } catch (err) {
@@ -54,7 +56,9 @@ const AllTasks = () => {
   };
 
   const handleLogout = () => {
-    console.log('Logging out...');
+    localStorage.removeItem('user');
+    toast.success('Logged out successfully!');
+    navigate('/login');
   };
 
   const handleEdit = (task) => {
@@ -77,7 +81,7 @@ const AllTasks = () => {
   const handleDelete = async (taskId) => {
     if (window.confirm('Are you sure you want to delete this task?')) {
       try {
-        await axios.delete(`${API_URL}/deleteTask/${taskId}`);
+        await axios.delete(`${API_URL}/${taskId}`);
         
         // Update local state
         setTasks(tasks.filter(task => task.id !== taskId));
