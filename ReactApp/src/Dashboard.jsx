@@ -1,14 +1,62 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
 import Sidebar from './components/Sidebar';
 import OverviewCards from './components/OverviewCards';
 import Charts from './components/Charts';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 import './Dashboard.css';
 
 const Dashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [activePage, setActivePage] = useState('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // Tasks data and loading state
+  const [tasks, setTasks] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // API Base URL
+  const API_URL = 'http://localhost:8080/tasks';
+
+  // Fetch all tasks on component mount
+  useEffect(() => {
+    fetchTasks();
+  }, []);
+
+  const fetchTasks = async () => {
+    const user = JSON.parse(localStorage.getItem('user'));
+
+    try {
+      setIsLoading(true);
+      setError(null);
+      const response = await axios.get(`${API_URL}/getTasksByUserId/${user.id}`);
+      setTasks(response.data);
+    } catch (err) {
+      console.error('Error fetching tasks:', err);
+      const errorMessage = err.response?.data?.message || 'Failed to fetch tasks';
+      setError(errorMessage);
+      toast.error("Failed to fetch tasks");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Calculate task statistics
+  const calculateStats = () => {
+    const allTasks = tasks.length;
+    const completedTasks = tasks.filter(task => task.status?.toLowerCase() === 'completed').length;
+    const pendingTasks = tasks.filter(task => task.status?.toLowerCase() === 'pending').length;
+    
+    return {
+      allTasks,
+      completedTasks,
+      pendingTasks
+    };
+  };
+
+  const stats = calculateStats();
 
   const handleLogout = () => {
     // Add logout logic here
@@ -60,10 +108,21 @@ const Dashboard = () => {
         </header>
 
         {/* Overview Cards */}
-        <OverviewCards />
+        <OverviewCards 
+          allTasks={stats.allTasks}
+          pendingTasks={stats.pendingTasks}
+          completedTasks={stats.completedTasks}
+          isLoading={isLoading}
+        />
 
         {/* Charts */}
-        <Charts />
+        <Charts 
+          tasks={tasks}
+          allTasks={stats.allTasks}
+          pendingTasks={stats.pendingTasks}
+          completedTasks={stats.completedTasks}
+          isLoading={isLoading}
+        />
       </main>
     </div>
   );
