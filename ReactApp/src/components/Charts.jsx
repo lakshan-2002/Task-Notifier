@@ -1,25 +1,62 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import './Charts.css';
 
-const Charts = () => {
-  // Sample data for line chart
-  const lineData = [
-    { day: 'Mon', completed: 4 },
-    { day: 'Tue', completed: 6 },
-    { day: 'Wed', completed: 3 },
-    { day: 'Thu', completed: 8 },
-    { day: 'Fri', completed: 5 },
-    { day: 'Sat', completed: 7 },
-    { day: 'Sun', completed: 4 },
-  ];
+const Charts = ({ tasks = [], allTasks = 0, pendingTasks = 0, completedTasks = 0, isLoading = false }) => {
+  // Calculate daily completion trend from actual tasks
+  const lineData = useMemo(() => {
+    // Get last 7 days
+    const last7Days = [];
+    const today = new Date();
+    
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+      const dateStr = date.toISOString().split('T')[0];
+      
+      // Count completed tasks for this day
+      const completedOnDay = tasks.filter(task => {
+        if (task.status?.toLowerCase() !== 'completed') return false;
+        // Assuming tasks have a completedDate or we can use dueDate as approximation
+        const taskDate = new Date(task.dueDate).toISOString().split('T')[0];
+        return taskDate === dateStr;
+      }).length;
+      
+      last7Days.push({
+        day: dayName,
+        completed: completedOnDay
+      });
+    }
+    
+    return last7Days;
+  }, [tasks]);
 
-  // Sample data for pie chart
-  const pieData = [
-    { name: 'Completed', value: 37, color: '#10b981' },
-    { name: 'Pending', value: 28, color: '#f59e0b' },
-    { name: 'All Tasks', value: 65, color: '#3b82f6' },
-  ];
+  // Pie chart data based on actual task counts
+  const pieData = useMemo(() => [
+    { name: 'Completed', value: completedTasks, color: '#10b981' },
+    { name: 'Pending', value: pendingTasks, color: '#f59e0b' },
+    { name: 'All Tasks', value: allTasks, color: '#3b82f6' }
+  ], [completedTasks, pendingTasks, allTasks]);
+
+  if (isLoading) {
+    return (
+      <div className="charts-grid">
+        <div className="chart-card">
+          <h3 className="chart-title">Daily Completion Trend</h3>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '300px' }}>
+            <p>Loading chart data...</p>
+          </div>
+        </div>
+        <div className="chart-card">
+          <h3 className="chart-title">Task Distribution</h3>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '300px' }}>
+            <p>Loading chart data...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="charts-grid">
