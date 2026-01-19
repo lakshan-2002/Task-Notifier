@@ -7,8 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/users")
 @CrossOrigin(origins = "http://localhost:5173")
@@ -21,8 +19,8 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PostMapping("/addUser")
-    public ResponseEntity<User> addUser(@RequestBody User user){
+    @PostMapping
+    public ResponseEntity<User> addUser(@RequestBody User user) {
         user.setPassword(DigestUtils.sha256Hex(user.getPassword()));
         userService.addNewUser(user);
         return ResponseEntity.ok(user);
@@ -54,24 +52,6 @@ public class UserController {
         }
         return null;
     }
-    @GetMapping("/getAllUsers")
-    public List<User> getUsers(){
-        return userService.getAllUsers();
-    }
 
-    @GetMapping("/getUser/{id}")
-    public User getUser(@PathVariable int id){
-        return userService.getUserById(id);
-    }
 
-    @PutMapping("/updateUser")
-    public ResponseEntity<User> updateUser(@RequestBody User user){
-        userService.updateUser(user);
-        return ResponseEntity.ok(user);
-    }
-
-    @DeleteMapping("/deleteUser/{id}")
-    public void deleteUser(@PathVariable int id){
-        userService.deleteUser(id);
-    }
 }
