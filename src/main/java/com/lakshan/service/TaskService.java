@@ -21,21 +21,11 @@ public class TaskService {
         taskRepository.save(task);
     }
 
-    public List<Task> getAllTasks() {
-        return taskRepository.findAll();
-    }
-
     public List<Task> getTasksByUserId(int userId) {
         if (!(taskRepository.findByUserId(userId).isEmpty()))
             return taskRepository.findByUserId(userId);
         else
             throw new IllegalArgumentException("No tasks found for user with id: " + userId);
-    }
-
-    public Task getTaskById(int id) {
-        return taskRepository.findById(id).orElseThrow(() ->
-                new IllegalArgumentException("Task not found with id: " + id)
-        );
     }
 
     public void updateTask(Task task) {
