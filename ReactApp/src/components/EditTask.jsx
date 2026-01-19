@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 import './EditTask.css';
 
 const EditTask = ({ task, isOpen, onClose, onSave }) => {
@@ -12,6 +14,12 @@ const EditTask = ({ task, isOpen, onClose, onSave }) => {
     dueDate: ''
   });
 
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  // API Base URL
+  const API_URL = 'http://localhost:8080/tasks';
+
   // Update form data when task changes
   useEffect(() => {
     if (task) {
@@ -19,8 +27,8 @@ const EditTask = ({ task, isOpen, onClose, onSave }) => {
         id: task.id,
         title: task.title,
         description: task.description,
-        status: task.status,
-        priority: task.priority,
+        status: task.status?.toLowerCase() || 'pending',
+        priority: task.priority?.toLowerCase() || 'medium',
         dueDate: task.dueDate
       });
     }
@@ -32,12 +40,38 @@ const EditTask = ({ task, isOpen, onClose, onSave }) => {
       ...prev,
       [name]: value
     }));
+    if (error) setError(null);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSave(formData);
-    onClose();
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const user = JSON.parse(localStorage.getItem('user'));
+
+      const response = await axios.put(`${API_URL}/updateTask`, {
+        id: formData.id,
+        title: formData.title,
+        description: formData.description,
+        status: formData.status,
+        priority: formData.priority,
+        dueDate: formData.dueDate,
+        user: user
+      });
+
+      toast.success('Task updated successfully!');
+      onSave(response.data); // Pass updated data to parent
+      onClose();
+    } catch (err) {
+      console.error('Error updating task:', err);
+      const errorMessage = err.response?.data?.message || 'Failed to update task';
+      setError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleClose = () => {
@@ -152,19 +186,28 @@ const EditTask = ({ task, isOpen, onClose, onSave }) => {
 
           {/* Modal Footer with Buttons */}
           <div className="modal-footer">
-            <button 
-              type="button" 
-              onClick={handleClose} 
-              className="modal-btn modal-btn-close"
-            >
-              Close
-            </button>
-            <button 
-              type="submit" 
-              className="modal-btn modal-btn-save"
-            >
-              Save Changes
-            </button>
+            {error && (
+              <div className="modal-error">
+                {error}
+              </div>
+            )}
+            <div>
+              <button 
+                type="button" 
+                onClick={handleClose} 
+                className="modal-btn modal-btn-close"
+                disabled={isLoading}
+              >
+                Close
+              </button>
+              <button 
+                type="submit" 
+                className="modal-btn modal-btn-save"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
           </div>
         </form>
       </div>
