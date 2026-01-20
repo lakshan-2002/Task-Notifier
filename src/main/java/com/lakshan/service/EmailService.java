@@ -1,50 +1,50 @@
 package com.lakshan.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
+import com.sendgrid.Method;
+import com.sendgrid.Request;
+import com.sendgrid.Response;
+import com.sendgrid.SendGrid;
+import com.sendgrid.helpers.mail.Mail;
+import com.sendgrid.helpers.mail.objects.Content;
+import com.sendgrid.helpers.mail.objects.Email;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.io.IOException;
+import org.slf4j.Logger;
 
 @Service
 public class EmailService {
 
-    private final JavaMailSender javaMailSender;
-    private final Logger logger = Logger.getLogger(EmailService.class.getName());
-
-    @Value("${spring.mail.username}")
-    private String senderEmail;
-
-    @Autowired
-    public EmailService(JavaMailSender javaMailSender) {
-        this.javaMailSender = javaMailSender;
-    }
+    private static final Logger log = LoggerFactory.getLogger(EmailService.class);
 
     @Async
-    public void sendEmail(String recipientEmail, String subject, String body) {
-        logger.log(Level.FINE, "Preparing to send email to {0} with subject " +
-                        "\"{1}\" (body length: {2} chars)",
-                new Object[]{recipientEmail, subject, body == null ? 0 : body.length()});
+    public void sendEmail(String recipientEmail, String subject, String body) throws IOException {
+        Email fromEmail = new Email("dailytasks.reminder@gmail.com");
+        Email toEmail = new Email(recipientEmail);
+        Content emailContent = new Content("text/plain", body);
+        Mail mail = new Mail(fromEmail, subject, toEmail, emailContent);
+
+        // Configure SendGrid client
+        SendGrid sendGrid = new SendGrid(System.getenv("SENDGRID_API_KEY"));
+        Request request = new Request();
 
         try {
-            SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
-            simpleMailMessage.setFrom(senderEmail);
-            simpleMailMessage.setTo(recipientEmail);
-            simpleMailMessage.setSubject(subject);
-            simpleMailMessage.setText(body);
+            request.setMethod(Method.POST);
+            request.setEndpoint("mail/send");
+            request.setBody(mail.build());
 
-            javaMailSender.send(simpleMailMessage);
-            logger.log(Level.INFO, "Email sent to {0} with subject \"{1}\"",
-                    new Object[]{recipientEmail, subject});
+            Response response = sendGrid.api(request);
 
+            if (response.getStatusCode() >= 200 && response.getStatusCode() < 300) {
+                log.info("Email sent successfully to {}", recipientEmail);
+            } else {
+                log.error("Failed to send email to {}. Status Code: {}, Body: {}",
+                        recipientEmail, response.getStatusCode(), response.getBody());
+            }
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Failed to send email to {0} with subject \"{1}\"",
-                    new Object[]{recipientEmail, subject});
-            logger.log(Level.SEVERE, "Exception while sending email", e);
+            throw new IOException(e);
         }
 
     }

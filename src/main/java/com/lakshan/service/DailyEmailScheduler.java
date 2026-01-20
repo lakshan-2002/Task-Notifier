@@ -33,8 +33,6 @@ public class DailyEmailScheduler {
 
     @Scheduled(cron = "0 0 8 * * ?", zone = "Asia/Colombo") // Every day at 8 AM
     public void sendDailyTaskReminders() {
-        logger.info("Starting daily task reminder email process.");
-
         LocalDate today = LocalDate.now();
         List<User> users = userRepository.findAll();
 
@@ -48,7 +46,11 @@ public class DailyEmailScheduler {
                 String subject = "Tasks Due Today Reminder";
                 String body = buildEmailBody(tasksDueToday);
 
-                emailService.sendEmail(user.getEmail(), subject, body);
+                try {
+                    emailService.sendEmail(user.getEmail(), subject, body);
+                } catch (Exception e) {
+                    logger.info(e.getMessage());
+                }
                 logger.info("Sent task reminder email to user: {}", user.getEmail());
             }
         }
