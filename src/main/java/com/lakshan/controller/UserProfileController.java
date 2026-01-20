@@ -24,6 +24,11 @@ public class UserProfileController {
         return ResponseEntity.status(201).body(userProfile);
     }
 
+    @GetMapping("/{userId}")
+    public UserProfile getUserProfileByUserId(@PathVariable int userId) {
+        return userProfileService.getUserProfileByUserId(userId);
+    }
+
     @PutMapping
     public ResponseEntity<UserProfile> updateUserProfile(@RequestBody UserProfile userProfile) {
         userProfileService.updateUserProfile(userProfile);

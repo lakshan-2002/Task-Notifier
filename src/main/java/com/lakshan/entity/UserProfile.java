@@ -35,6 +35,10 @@ public class UserProfile {
     @Column(name = "address")
     private String address;
 
+    @OneToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
     public int getId() {
         return id;
     }
@@ -105,5 +109,13 @@ public class UserProfile {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

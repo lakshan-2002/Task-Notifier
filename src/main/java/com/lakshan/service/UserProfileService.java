@@ -19,6 +19,11 @@ public class UserProfileService {
         userProfileRepository.save(userProfile);
     }
 
+    public UserProfile getUserProfileByUserId(int userId) {
+       return userProfileRepository.findByUserId(userId).orElseThrow(() ->
+               new IllegalArgumentException("UserProfile not found for user with id: " + userId)
+       );
+    }
     public void updateUserProfile(UserProfile userProfile) {
         if (userProfileRepository.existsById(userProfile.getId()))
             userProfileRepository.save(userProfile);
