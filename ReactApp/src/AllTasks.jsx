@@ -45,7 +45,6 @@ const AllTasks = () => {
       console.error('Error fetching tasks:', err);
       const errorMessage = err.response?.data?.message || 'Failed to fetch tasks';
       setError(errorMessage);
-      toast.error("Failed to fetch tasks");
     } finally {
       setIsLoading(false);
     }
