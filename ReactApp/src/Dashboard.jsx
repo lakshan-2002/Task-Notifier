@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import Sidebar from './components/Sidebar';
 import OverviewCards from './components/OverviewCards';
@@ -8,6 +9,7 @@ import { toast } from 'react-toastify';
 import './Dashboard.css';
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [activePage, setActivePage] = useState('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
@@ -31,13 +33,12 @@ const Dashboard = () => {
     try {
       setIsLoading(true);
       setError(null);
-      const response = await axios.get(`${API_URL}/getTasksByUserId/${user.id}`);
+      const response = await axios.get(`${API_URL}/${user.id}`);
       setTasks(response.data);
     } catch (err) {
       console.error('Error fetching tasks:', err);
       const errorMessage = err.response?.data?.message || 'Failed to fetch tasks';
       setError(errorMessage);
-      toast.error("Failed to fetch tasks");
     } finally {
       setIsLoading(false);
     }
@@ -59,8 +60,9 @@ const Dashboard = () => {
   const stats = calculateStats();
 
   const handleLogout = () => {
-    // Add logout logic here
-    console.log('Logging out...');
+    localStorage.removeItem('user');
+    toast.success('Logged out successfully!');
+    navigate('/login');
   };
 
   return (

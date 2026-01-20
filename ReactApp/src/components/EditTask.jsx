@@ -51,7 +51,7 @@ const EditTask = ({ task, isOpen, onClose, onSave }) => {
     try {
       const user = JSON.parse(localStorage.getItem('user'));
 
-      const response = await axios.put(`${API_URL}/updateTask`, {
+      const response = await axios.put(`${API_URL}`, {
         id: formData.id,
         title: formData.title,
         description: formData.description,

@@ -1,35 +1,137 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, use } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Search, Camera, User, Mail, Phone, MapPin, Calendar, Briefcase } from 'lucide-react';
 import Sidebar from './components/Sidebar';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 import './Profile.css';
 
 const Profile = () => {
+  const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [activePage, setActivePage] = useState('profile');
   const [searchQuery, setSearchQuery] = useState('');
   
   // Profile state
   const [profileData, setProfileData] = useState({
-    firstName: 'Lakshan',
-    lastName: 'Imantha',
-    email: 'lakshan.imantha02@gmail.com',
-    phone: '0702294900',
-    address: 'No 301/3, Kanampitiya Road, Galle',
-    dateOfBirth: '2002-10-02',
-    occupation: 'Backend Developer',
-    bio: 'Backend developer and a Java enthusiast. Passionate about building scalable web applications and enjoy working with Java and Spring Boot.',
+    id: null,
+    firstName: '',
+    lastName: '',
+    email: '',
+    phoneNumber: '',
+    address: '',
+    dateOfBirth: '',
+    occupation: '',
+    bio: '',
     profileImage: null
   });
 
+  const [originalData, setOriginalData] = useState({});
   const [previewImage, setPreviewImage] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isNewProfile, setIsNewProfile] = useState(false);
+
+  // API Base URL
+  const API_URL = 'http://localhost:8080/user_profile';
+
+  // Fetch user profile on component mount
+  useEffect(() => {
+    fetchUserProfile();
+  }, []);
+
+  const fetchUserProfile = async () => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    
+    if (!user || !user.id) {
+      toast.error('User not found. Please login again.');
+      navigate('/login');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const response = await axios.get(`${API_URL}/${user.id}`);
+      if (response.data && (response.data.firstName || response.data.email)) {
+        const userData = response.data;
+        const profileInfo = {
+          id: userData.id || null,
+          firstName: userData.firstName || '',
+          lastName: userData.lastName || '',
+          email: userData.email || user.email || '',
+          phoneNumber: userData.phoneNumber || '',
+          address: userData.address || '',
+          dateOfBirth: userData.dateOfBirth || '',
+          occupation: userData.occupation || '',
+          bio: userData.bio || '',
+          profileImage: userData.profileImage || null
+        };
+        
+        // Set preview image if exists
+        if (userData.profileImage) {
+          setPreviewImage(userData.profileImage);
+        }
+        
+        setProfileData(profileInfo);
+        setOriginalData(profileInfo);
+        setIsNewProfile(false);
+      } else {
+        // No profile found, use user data from localStorage as starting point
+        const profileInfo = {
+          id: null,
+          firstName: '',
+          lastName: '',
+          email: user.email || '',
+          phoneNumber: '',
+          address: '',
+          dateOfBirth: '',
+          occupation: '',
+          bio: '',
+          profileImage: null
+        };
+        setProfileData(profileInfo);
+        setOriginalData(profileInfo);
+        setIsNewProfile(true);
+        setIsEditing(true); 
+      }
+    } catch (err) {
+      console.error('Error fetching profile:', err);
+      
+      // If 404 or profile not found, treat as new profile
+      if (err.response?.status === 404 || err.response?.status === 500) {
+        const profileInfo = {
+          firstName: '',
+          lastName: '',
+          email: user.email || '',
+          phoneNumber: '',
+          address: '',
+          dateOfBirth: '',
+          occupation: '',
+          bio: '',
+          profileImage: null
+        };
+        setProfileData(profileInfo);
+        setOriginalData(profileInfo);
+        setIsNewProfile(true);
+        setIsEditing(true);
+        toast.info('Please complete your profile');
+      } else {
+        toast.error('Failed to load profile data');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleNavigate = (pageId) => {
     setActivePage(pageId);
   };
 
   const handleLogout = () => {
-    console.log('Logging out...');
+    localStorage.removeItem('user');
+    toast.success('Logged out successfully!');
+    navigate('/login');
   };
 
   const handleInputChange = (e) => {
@@ -55,20 +157,80 @@ const Profile = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Profile updated:', profileData);
-    setIsEditing(false);
-    // Add your API call here to save profile data
+    const user = JSON.parse(localStorage.getItem('user'));
+
+    // Validate required fields
+    if (!profileData.firstName || !profileData.lastName || !profileData.email) {
+      toast.error('Please fill in all required fields (First Name, Last Name, Email)');
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+      
+      // Prepare profile data
+      const profilePayload = {
+        firstName: profileData.firstName,
+        lastName: profileData.lastName,
+        email: profileData.email,
+        phoneNumber: profileData.phoneNumber || null,
+        address: profileData.address || '',
+        dateOfBirth: profileData.dateOfBirth || '',
+        occupation: profileData.occupation || '',
+        bio: profileData.bio || '',
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email
+        }
+      };
+
+      let response;
+      if (isNewProfile) {
+        // Create new profile
+        response = await axios.post(`${API_URL}`, profilePayload);
+        setIsNewProfile(false);
+        toast.success('Profile created successfully!');
+      } else {
+        // Update existing profile
+        const updatePayload = {
+          ...profilePayload,
+          id: profileData.id
+        };
+        response = await axios.put(`${API_URL}`, updatePayload);
+        toast.success('Profile updated successfully!');
+      }
+      
+      // Update local state
+      setOriginalData(profileData);
+      setIsEditing(false);
+      
+    
+    } catch (err) {
+      console.error('Error saving profile:', err);
+      const errorMessage = err.response?.data?.message || 'Failed to save profile';
+      toast.error(errorMessage);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleCancel = () => {
-    setIsEditing(false);
-    // Reset to original data if needed
+    if (isNewProfile) {
+      // For new profiles, just reset to empty but keep editing enabled
+      setProfileData(originalData);
+    } else {
+      setProfileData(originalData);
+      setIsEditing(false);
+    }
   };
 
   const getInitials = () => {
-    return `${profileData.firstName.charAt(0)}${profileData.lastName.charAt(0)}`;
+    const first = profileData.firstName?.charAt(0)?.toUpperCase() || 'U';
+    const last = profileData.lastName?.charAt(0)?.toUpperCase() || 'N';
+    return `${first}${last}`;
   };
 
   return (
@@ -99,6 +261,12 @@ const Profile = () => {
 
         {/* Profile Container */}
         <div className="profile-container">
+          {isLoading ? (
+            <div className="loading-container">
+              <div className="spinner"></div>
+              <p>Loading profile...</p>
+            </div>
+          ) : (
           <div className="profile-card">
             {/* Profile Header Section */}
             <div className="profile-header-section">
@@ -125,8 +293,12 @@ const Profile = () => {
                   )}
                 </div>
                 <div className="profile-header-info">
-                  <h2 className="profile-name">{profileData.firstName} {profileData.lastName}</h2>
-                  <p className="profile-occupation">{profileData.occupation}</p>
+                  <h2 className="profile-name">
+                    {profileData.firstName || profileData.lastName 
+                      ? `${profileData.firstName} ${profileData.lastName}` 
+                      : 'Your Name'}
+                  </h2>
+                  <p className="profile-occupation">{profileData.occupation || 'Your Occupation'}</p>
                 </div>
               </div>
               
@@ -156,7 +328,7 @@ const Profile = () => {
                     value={profileData.bio}
                     onChange={handleInputChange}
                     className="profile-form-textarea"
-                    placeholder="Tell us about yourself"
+                    placeholder="Tell us about yourself..."
                     rows="3"
                     disabled={!isEditing}
                   />
@@ -180,8 +352,8 @@ const Profile = () => {
                       value={profileData.firstName}
                       onChange={handleInputChange}
                       className="profile-form-input"
-                      placeholder="First name"
-                      disabled={!isEditing}
+                      placeholder="Enter your first name"
+                      disabled={true}
                       required
                     />
                   </div>
@@ -198,8 +370,8 @@ const Profile = () => {
                       value={profileData.lastName}
                       onChange={handleInputChange}
                       className="profile-form-input"
-                      placeholder="Last name"
-                      disabled={!isEditing}
+                      placeholder="Enter your last name"
+                      disabled={true}
                       required
                     />
                   </div>
@@ -218,7 +390,8 @@ const Profile = () => {
                       value={profileData.dateOfBirth}
                       onChange={handleInputChange}
                       className="profile-form-input"
-                      disabled={!isEditing}
+                      placeholder="Select your date of birth"
+                      disabled={true}
                     />
                   </div>
 
@@ -234,7 +407,7 @@ const Profile = () => {
                       value={profileData.occupation}
                       onChange={handleInputChange}
                       className="profile-form-input"
-                      placeholder="Your occupation"
+                      placeholder="Enter your occupation"
                       disabled={!isEditing}
                     />
                   </div>
@@ -257,25 +430,25 @@ const Profile = () => {
                     value={profileData.email}
                     onChange={handleInputChange}
                     className="profile-form-input"
-                    placeholder="your.email@example.com"
-                    disabled={!isEditing}
+                    placeholder="Enter your email address"
+                    disabled={true}
                     required
                   />
                 </div>
 
                 <div className="profile-form-group">
-                  <label htmlFor="phone" className="profile-form-label">
+                  <label htmlFor="phoneNumber" className="profile-form-label">
                     <Phone size={18} />
                     Phone Number
                   </label>
                   <input
                     type="tel"
-                    id="phone"
-                    name="phone"
-                    value={profileData.phone}
+                    id="phoneNumber"
+                    name="phoneNumber"
+                    value={profileData.phoneNumber}
                     onChange={handleInputChange}
                     className="profile-form-input"
-                    placeholder="+1 (555) 123-4567"
+                    placeholder="Enter your phone number"
                     disabled={!isEditing}
                   />
                 </div>
@@ -292,7 +465,7 @@ const Profile = () => {
                     value={profileData.address}
                     onChange={handleInputChange}
                     className="profile-form-input"
-                    placeholder="Your address"
+                    placeholder="Enter your address"
                     disabled={!isEditing}
                   />
                 </div>
@@ -305,19 +478,22 @@ const Profile = () => {
                     type="button" 
                     onClick={handleCancel} 
                     className="profile-btn profile-btn-cancel"
+                    disabled={isSaving}
                   >
                     Cancel
                   </button>
                   <button 
                     type="submit" 
                     className="profile-btn profile-btn-save"
+                    disabled={isSaving}
                   >
-                    Save Changes
+                    {isSaving ? 'Saving...' : 'Save Changes'}
                   </button>
                 </div>
               )}
             </form>
           </div>
+          )}
         </div>
       </main>
     </div>

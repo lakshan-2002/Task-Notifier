@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import './AddTask.css';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
 const AddTask = () => {
+  const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [activePage, setActivePage] = useState('add-task');
-  
-  // Form state
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -17,18 +17,18 @@ const AddTask = () => {
     dueDate: ''
   });
 
-  // UI state
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
 
   const handleNavigate = (pageId) => {
     setActivePage(pageId);
-    // Add navigation logic here
   };
 
   const handleLogout = () => {
-    console.log('Logging out...');
+    localStorage.removeItem('user');
+    toast.success('Logged out successfully!');
+    navigate('/login');
   };
 
   const handleInputChange = (e) => {
@@ -37,7 +37,7 @@ const AddTask = () => {
       ...prev,
       [name]: value
     }));
-    // Clear messages when user starts typing
+    
     if (error) setError(null);
     if (successMessage) setSuccessMessage(null);
   };
@@ -49,7 +49,7 @@ const AddTask = () => {
     setSuccessMessage(null);
 
     try {
-      const API_URL = 'http://localhost:8080/tasks/addTask';
+      const API_URL = 'http://localhost:8080/tasks';
 
       const user = JSON.parse(localStorage.getItem('user'));
 

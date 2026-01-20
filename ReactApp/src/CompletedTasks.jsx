@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Search, Calendar, Flag, CheckCircle, Clock, Edit2, Trash2, Filter } from 'lucide-react';
 import Sidebar from './components/Sidebar';
 import EditTask from './components/EditTask';
@@ -7,6 +8,7 @@ import { toast } from 'react-toastify';
 import './CompletedTasks.css';
 
 const CompletedTasks = () => {
+  const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [activePage, setActivePage] = useState('completed-tasks');
   const [searchQuery, setSearchQuery] = useState('');
@@ -36,7 +38,7 @@ const CompletedTasks = () => {
     try {
       setIsLoading(true);
       setError(null);
-      const response = await axios.get(`${API_URL}/getTasksByUserId/${user.id}`);
+      const response = await axios.get(`${API_URL}/${user.id}`);
       console.log('Sample task - status:', response.data[0]?.status, 'priority:', response.data[0]?.priority);
       const completedTasks = response.data.filter(task => task.status?.toLowerCase() === 'completed');
       setTasks(completedTasks);
@@ -44,7 +46,6 @@ const CompletedTasks = () => {
       console.error('Error fetching tasks:', err);
       const errorMessage = err.response?.data?.message || 'Failed to fetch tasks';
       setError(errorMessage);
-      toast.error("Failed to fetch tasks");
     } finally {
       setIsLoading(false);
     }
@@ -55,7 +56,9 @@ const CompletedTasks = () => {
   };
 
   const handleLogout = () => {
-    console.log('Logging out...');
+    localStorage.removeItem('user');
+    toast.success('Logged out successfully!');
+    navigate('/login');
   };
 
   const handleEdit = (task) => {
@@ -78,7 +81,7 @@ const CompletedTasks = () => {
   const handleDelete = async (taskId) => {
     if (window.confirm('Are you sure you want to delete this task?')) {
       try {
-        await axios.delete(`${API_URL}/deleteTask/${taskId}`);
+        await axios.delete(`${API_URL}/${taskId}`);
         
         // Update local state
         setTasks(tasks.filter(task => task.id !== taskId));
