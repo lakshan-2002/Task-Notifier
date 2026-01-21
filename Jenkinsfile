@@ -2,6 +2,7 @@ pipeline {
   agent any
   environment {
     DOCKERHUB_CREDS = 'dockerhub-crds'   // Jenkins credentials ID
+    PATH = "/usr/bin:${env.PATH}"
   }
   stages {
     stage('Build and Push Frontend') {
