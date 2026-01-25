@@ -25,7 +25,7 @@ const AllTasks = () => {
   const [error, setError] = useState(null);
 
   // API Base URL
-  const API_URL = 'http://localhost:8080/tasks';
+  const API_URL = 'http://44.217.52.15:8080/tasks';
 
   // Fetch all tasks on component mount
   useEffect(() => {

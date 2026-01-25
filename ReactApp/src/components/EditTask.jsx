@@ -18,7 +18,7 @@ const EditTask = ({ task, isOpen, onClose, onSave }) => {
   const [error, setError] = useState(null);
 
   // API Base URL
-  const API_URL = 'http://localhost:8080/tasks';
+  const API_URL = 'http://44.217.52.15:8080/tasks';
 
   // Update form data when task changes
   useEffect(() => {

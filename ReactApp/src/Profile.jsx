@@ -34,7 +34,7 @@ const Profile = () => {
   const [isNewProfile, setIsNewProfile] = useState(false);
 
   // API Base URL
-  const API_URL = 'http://localhost:8080/user_profile';
+  const API_URL = 'http://44.217.52.15:8080/user_profile';
 
   // Fetch user profile on component mount
   useEffect(() => {

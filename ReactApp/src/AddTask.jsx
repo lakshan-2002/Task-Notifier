@@ -49,7 +49,7 @@ const AddTask = () => {
     setSuccessMessage(null);
 
     try {
-      const API_URL = 'http://localhost:8080/tasks';
+      const API_URL = 'http://44.217.52.15:8080/tasks';
 
       const user = JSON.parse(localStorage.getItem('user'));
 

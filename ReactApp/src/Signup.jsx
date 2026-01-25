@@ -68,7 +68,7 @@ function signup() {
     
     if (validateForm()) {
       try {
-      const response = await axios.post("http://localhost:8080/users", {
+      const response = await axios.post("http://44.217.52.15:8080/users", {
         name: formData.name,
         email: formData.email,
         password: formData.password,

@@ -50,7 +50,7 @@ function login() {
     
     if (validateForm()) {
       try {
-        const response = await axios.post("http://localhost:8080/users/login", {
+        const response = await axios.post("http://44.217.52.15:8080/users/login", {
           email: formData.email,
           password: formData.password
         });
