@@ -79,16 +79,20 @@ pipeline {
 
     stage('Deploy with Ansible') {
       steps {
+        script {
+          sh "mkdir -p /tmp/ansible"
+          sh "chmod 600 '${SSH_KEY}'"
+
+          writeFile file: '/tmp/ansible/inventory.ini', text: """[app_servers]
+    app_server ansible_host=${env.INSTANCE_IP} ansible_user=ubuntu ansible_ssh_private_key_file=${SSH_KEY} ansible_python_interpreter=/usr/bin/python3 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+    """
+
+          sh 'echo "=== Generated Inventory ==="'
+          sh 'cat /tmp/ansible/inventory.ini'
+          sh 'echo "==========================="'
+        }
+
         sh '''
-          mkdir -p /tmp/ansible
-          chmod 600 "${SSH_KEY}"
-
-          cat > /tmp/ansible/inventory.ini <<EOF
-[app_servers]
-app_server ansible_host=${INSTANCE_IP} ansible_user=ubuntu ansible_ssh_private_key_file=${SSH_KEY} ansible_python_interpreter=/usr/bin/python3 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
-EOF
-
-          # Export database credentials as environment variables
           export DB_URL="${DB_URL}"
           export DB_USERNAME="${DB_USERNAME}"
           export DB_PASSWORD="${DB_PASSWORD}"
@@ -99,6 +103,7 @@ EOF
         '''
       }
     }
+
 
     stage('Health Check') {
       steps {
