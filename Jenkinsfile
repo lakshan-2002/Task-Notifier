@@ -65,8 +65,7 @@ pipeline {
               export AWS_ACCESS_KEY_ID=$AWS_CREDENTIALS_USR
               export AWS_SECRET_ACCESS_KEY=$AWS_CREDENTIALS_PSW
 
-              terraform init -input=false
-              terraform apply -auto-approve
+              terraform init -input=false -backend=true -reconfigure
 
               terraform output -raw instance_public_ip -no-color > /tmp/instance_ip.txt
             '''
