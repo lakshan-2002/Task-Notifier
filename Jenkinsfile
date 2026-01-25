@@ -61,12 +61,12 @@ pipeline {
      stage('Get Instance IP from Terraform') {
        steps {
          dir('terraform') {
-            sh '''
-              export AWS_ACCESS_KEY_ID=$AWS_CREDENTIALS_USR
-              export AWS_SECRET_ACCESS_KEY=$AWS_CREDENTIALS_PSW
+             sh '''
+               export AWS_ACCESS_KEY_ID=$AWS_CREDENTIALS_USR
+               export AWS_SECRET_ACCESS_KEY=$AWS_CREDENTIALS_PSW
 
-              terraform output -raw instance_public_ip -no-color > /tmp/instance_ip.txt
-            '''
+               terraform output -raw instance_public_ip > /tmp/instance_ip.txt
+             '''
          }
 
          script {
@@ -74,10 +74,6 @@ pipeline {
              script: 'cat /tmp/instance_ip.txt',
              returnStdout: true
            ).trim()
-
-           if(!env.INSTANCE_IP){
-             error "INSTANCE_IP is empty — Terraform output failed"
-           }
            echo "Instance IP: ${env.INSTANCE_IP}"
          }
        }
@@ -98,7 +94,6 @@ pipeline {
           export DB_USERNAME="$DB_USERNAME"
           export DB_PASSWORD="$DB_PASSWORD"
           export SENDGRID_API_KEY="$SENDGRID_API_KEY"
-
 
           ansible-playbook -i /tmp/ansible/inventory.ini ansible/deploy-playbook.yml
         '''
