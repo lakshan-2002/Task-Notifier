@@ -53,9 +53,10 @@ pipeline {
               export AWS_SECRET_ACCESS_KEY=$AWS_CREDENTIALS_PSW
 
               terraform output -raw instance_public_ip > /tmp/instance_ip.txt
+
+              env.INSTANCE_IP = sh(script: 'cat /tmp/instance_ip.txt', returnStdout: true).trim()
+              echo "Instance IP: ${env.INSTANCE_IP}"
             '''
-            env.INSTANCE_IP = sh(script: 'cat /tmp/instance_ip.txt', returnStdout: true).trim()
-            echo "Instance IP: ${env.INSTANCE_IP}"
           }
         }
       }
