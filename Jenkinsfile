@@ -67,6 +67,7 @@ pipeline {
       steps {
         sh '''
           mkdir -p /tmp/ansible
+          chmod 600 \${SSH_KEY}
 
           cat > /tmp/ansible/inventory.ini <<EOF
 [app_servers]
