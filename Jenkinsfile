@@ -3,9 +3,13 @@ pipeline {
 
   environment {
     DOCKERHUB_CREDS = credentials('dockerhub-creds')
+    AWS_CREDENTIALS = credentials('aws-credentials')
     SSH_KEY = credentials('aws-ssh-key')
+    DB_URL = credentials('db-url')
+    DB_USERNAME = credentials('db-username')
+    DB_PASSWORD = credentials('db-password')
+    SENDGRID_API_KEY = credentials('sendgrid-api-key')
     ANSIBLE_HOST_KEY_CHECKING = 'False'
-    INSTANCE_IP = 'YOUR_INSTANCE_IP_HERE'  // ⚠️ REPLACE with actual IP
   }
 
   stages {
@@ -40,6 +44,23 @@ pipeline {
       }
     }
 
+    stage('Get Instance IP from Terraform') {
+      steps {
+        dir('terraform') {
+          script {
+            sh '''
+              export AWS_ACCESS_KEY_ID=$AWS_CREDENTIALS_USR
+              export AWS_SECRET_ACCESS_KEY=$AWS_CREDENTIALS_PSW
+
+              terraform output -raw instance_public_ip > /tmp/instance_ip.txt
+            '''
+            env.INSTANCE_IP = sh(script: 'cat /tmp/instance_ip.txt', returnStdout: true).trim()
+            echo "Instance IP: ${env.INSTANCE_IP}"
+          }
+        }
+      }
+    }
+
     stage('Deploy with Ansible') {
       steps {
         sh """
@@ -50,11 +71,14 @@ pipeline {
 app_server ansible_host=${env.INSTANCE_IP} ansible_user=ubuntu ansible_ssh_private_key_file=${SSH_KEY} ansible_python_interpreter=/usr/bin/python3 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
 EOF
 
-          export DOCKERHUB_USERNAME=\$DOCKERHUB_CREDS_USR
-          export DOCKERHUB_PASSWORD=\$DOCKERHUB_CREDS_PSW
+          # Export database credentials as environment variables
+          export DB_URL="${DB_URL}"
+          export DB_USERNAME="${DB_USERNAME}"
+          export DB_PASSWORD="${DB_PASSWORD}"
+          export SENDGRID_API_KEY="${SENDGRID_API_KEY}"
           export IMAGE_TAG=latest
 
-          ansible-playbook -i /tmp/ansible/inventory.ini ansible/deploy-playbook.yml
+          ansible-playbook -i /tmp/ansible/inventory.ini ansible/deploy-playbook-simple.yml
         """
       }
     }
@@ -63,15 +87,11 @@ EOF
       steps {
         sh """
           echo "Performing health checks..."
-
-          # Wait for containers to fully start
           sleep 30
 
-          # Check backend
           echo "Checking backend..."
           curl -f http://${env.INSTANCE_IP}:8080 || echo "Backend check failed but continuing..."
 
-          # Check frontend
           echo "Checking frontend..."
           curl -f http://${env.INSTANCE_IP}:5173 || echo "Frontend check failed but continuing..."
         """
@@ -100,10 +120,10 @@ EOF
       sh 'docker image prune -f || true'
     }
     success {
-      echo 'Deployment completed successfully!'
+      echo 'Pipeline completed successfully!'
     }
     failure {
-      echo 'Deployment failed! Check logs for details.'
+      echo 'Pipeline failed! Check logs for details.'
     }
   }
 }
