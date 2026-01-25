@@ -61,20 +61,26 @@ pipeline {
      stage('Get Instance IP from Terraform') {
        steps {
          dir('terraform') {
-           ansiColor('xterm') {
-             sh '''
-               export AWS_ACCESS_KEY_ID=$AWS_CREDENTIALS_USR
-               export AWS_SECRET_ACCESS_KEY=$AWS_CREDENTIALS_PSW
+            sh '''
+              export AWS_ACCESS_KEY_ID=$AWS_CREDENTIALS_USR
+              export AWS_SECRET_ACCESS_KEY=$AWS_CREDENTIALS_PSW
 
-               terraform output -raw instance_public_ip -no-color > /tmp/instance_ip.txt
-             '''
-           }
+              terraform init -input=false
+              terraform apply -auto-approve
+
+              terraform output -raw instance_public_ip -no-color > /tmp/instance_ip.txt
+            '''
+         }
 
            script {
              env.INSTANCE_IP = sh(
                script: 'cat /tmp/instance_ip.txt',
                returnStdout: true
              ).trim()
+
+             if(!env.INSTANCE_IP){
+                error "INSTANCE_IP is empty — Terraform output failed"
+             }
              echo "Instance IP: ${env.INSTANCE_IP}"
            }
          }
