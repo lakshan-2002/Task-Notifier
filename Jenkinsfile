@@ -83,7 +83,6 @@ pipeline {
              }
              echo "Instance IP: ${env.INSTANCE_IP}"
            }
-         }
        }
      }
 
