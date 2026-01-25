@@ -81,7 +81,8 @@ pipeline {
       steps {
         script {
           sh "mkdir -p /tmp/ansible"
-          sh "chmod 600 '${SSH_KEY}'"
+          sh "cp '${SSH_KEY}' /tmp/ansible/ssh_key.pem"
+          sh "chmod 600 /tmp/ansible/ssh_key.pem"
 
           writeFile file: '/tmp/ansible/inventory.ini', text: """[app_servers]
     app_server ansible_host=${env.INSTANCE_IP} ansible_user=ubuntu ansible_ssh_private_key_file=${SSH_KEY} ansible_python_interpreter=/usr/bin/python3 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
