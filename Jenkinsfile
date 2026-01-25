@@ -79,29 +79,21 @@ pipeline {
 
     stage('Deploy with Ansible') {
       steps {
-        script {
-          sh "mkdir -p /tmp/ansible"
-          sh "cp '${SSH_KEY}' /tmp/ansible/ssh_key.pem"
-          sh "chmod 600 /tmp/ansible/ssh_key.pem"
+        sh """
+          mkdir -p /tmp/ansible
 
-          writeFile file: '/tmp/ansible/inventory.ini', text: """[app_servers]
-    app_server ansible_host=${env.INSTANCE_IP} ansible_user=ubuntu ansible_ssh_private_key_file=${SSH_KEY} ansible_python_interpreter=/usr/bin/python3 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
-    """
+          cat > /tmp/ansible/inventory.ini <<EOF
+          [app_servers]
+          app_server ansible_host=${env.INSTANCE_IP} ansible_user=ubuntu ansible_ssh_private_key_file=${SSH_KEY} ansible_python_interpreter=/usr/bin/python3 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+          EOF
 
-          sh 'echo "=== Generated Inventory ==="'
-          sh 'cat /tmp/ansible/inventory.ini'
-          sh 'echo "==========================="'
-        }
-
-        sh '''
           export DB_URL="${DB_URL}"
           export DB_USERNAME="${DB_USERNAME}"
           export DB_PASSWORD="${DB_PASSWORD}"
           export SENDGRID_API_KEY="${SENDGRID_API_KEY}"
-          export IMAGE_TAG=latest
 
           ansible-playbook -i /tmp/ansible/inventory.ini ansible/deploy-playbook.yml
-        '''
+        """
       }
     }
 
