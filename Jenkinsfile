@@ -53,10 +53,11 @@ pipeline {
               export AWS_SECRET_ACCESS_KEY=$AWS_CREDENTIALS_PSW
 
               terraform output -raw instance_public_ip > /tmp/instance_ip.txt
-
-              env.INSTANCE_IP = sh(script: 'cat /tmp/instance_ip.txt', returnStdout: true).trim()
-              echo "Instance IP: ${env.INSTANCE_IP}"
             '''
+
+            env.INSTANCE_IP = sh(script: 'cat /tmp/instance_ip.txt', returnStdout: true).trim()
+            echo "Instance IP: ${env.INSTANCE_IP}"
+
           }
         }
       }
@@ -69,7 +70,7 @@ pipeline {
 
           cat > /tmp/ansible/inventory.ini <<EOF
 [app_servers]
-app_server ansible_host=${env.INSTANCE_IP} ansible_user=ubuntu ansible_ssh_private_key_file=${SSH_KEY} ansible_python_interpreter=/usr/bin/python3 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+app_server ansible_host=${INSTANCE_IP} ansible_user=ubuntu ansible_ssh_private_key_file=${SSH_KEY} ansible_python_interpreter=/usr/bin/python3 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
 EOF
 
           # Export database credentials as environment variables
@@ -91,10 +92,10 @@ EOF
           sleep 30
 
           echo "Checking backend..."
-          curl -f http://${env.INSTANCE_IP}:8080 || echo "Backend check failed but continuing..."
+          curl -f http://${INSTANCE_IP}:8080 || echo "Backend check failed but continuing..."
 
           echo "Checking frontend..."
-          curl -f http://${env.INSTANCE_IP}:5173 || echo "Frontend check failed but continuing..."
+          curl -f http://${INSTANCE_IP}:5173 || echo "Frontend check failed but continuing..."
         '''
       }
     }
