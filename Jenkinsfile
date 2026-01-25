@@ -72,17 +72,17 @@ pipeline {
             '''
          }
 
-           script {
-             env.INSTANCE_IP = sh(
-               script: 'cat /tmp/instance_ip.txt',
-               returnStdout: true
-             ).trim()
+         script {
+           env.INSTANCE_IP = sh(
+             script: 'cat /tmp/instance_ip.txt',
+             returnStdout: true
+           ).trim()
 
-             if(!env.INSTANCE_IP){
-                error "INSTANCE_IP is empty — Terraform output failed"
-             }
-             echo "Instance IP: ${env.INSTANCE_IP}"
+           if(!env.INSTANCE_IP){
+             error "INSTANCE_IP is empty — Terraform output failed"
            }
+           echo "Instance IP: ${env.INSTANCE_IP}"
+         }
        }
      }
 
