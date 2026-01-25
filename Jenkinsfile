@@ -63,7 +63,7 @@ pipeline {
 
     stage('Deploy with Ansible') {
       steps {
-        sh """
+        sh '''
           mkdir -p /tmp/ansible
 
           cat > /tmp/ansible/inventory.ini <<EOF
@@ -78,14 +78,14 @@ EOF
           export SENDGRID_API_KEY="${SENDGRID_API_KEY}"
           export IMAGE_TAG=latest
 
-          ansible-playbook -i /tmp/ansible/inventory.ini ansible/deploy-playbook-simple.yml
-        """
+          ansible-playbook -i /tmp/ansible/inventory.ini ansible/deploy-playbook.yml
+        '''
       }
     }
 
     stage('Health Check') {
       steps {
-        sh """
+        sh '''
           echo "Performing health checks..."
           sleep 30
 
@@ -94,7 +94,7 @@ EOF
 
           echo "Checking frontend..."
           curl -f http://${env.INSTANCE_IP}:5173 || echo "Frontend check failed but continuing..."
-        """
+        '''
       }
     }
 
