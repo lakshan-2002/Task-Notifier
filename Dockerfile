@@ -1,8 +1,13 @@
 # Stage 1: Build the application
 FROM maven:3.8.6-eclipse-temurin-17 AS builder
 WORKDIR /app
-COPY . .
-RUN mvn clean install -Dmaven.test.skip
+
+COPY pom.xml .
+RUN mvn dependency:go-offline -B
+
+# Then copy source and build
+COPY src ./src
+RUN mvn clean package -DskipTests
 
 # Stage 2: Create the final image
 FROM eclipse-temurin:17-jdk-alpine
