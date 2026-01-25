@@ -58,24 +58,29 @@ pipeline {
       }
     }
 
-    stage('Get Instance IP from Terraform') {
-      steps {
-        dir('terraform') {
-          script {
-            sh '''
-              export AWS_ACCESS_KEY_ID=$AWS_CREDENTIALS_USR
-              export AWS_SECRET_ACCESS_KEY=$AWS_CREDENTIALS_PSW
+     stage('Get Instance IP from Terraform') {
+       steps {
+         dir('terraform') {
+           ansiColor('xterm') {
+             sh '''
+               export AWS_ACCESS_KEY_ID=$AWS_CREDENTIALS_USR
+               export AWS_SECRET_ACCESS_KEY=$AWS_CREDENTIALS_PSW
 
-              terraform output -raw instance_public_ip > /tmp/instance_ip.txt
-            '''
+               terraform output -raw instance_public_ip -no-color > /tmp/instance_ip.txt
+             '''
+           }
 
-            env.INSTANCE_IP = sh(script: 'cat /tmp/instance_ip.txt', returnStdout: true).trim()
-            echo "Instance IP: ${env.INSTANCE_IP}"
+           script {
+             env.INSTANCE_IP = sh(
+               script: 'cat /tmp/instance_ip.txt',
+               returnStdout: true
+             ).trim()
+             echo "Instance IP: ${env.INSTANCE_IP}"
+           }
+         }
+       }
+     }
 
-          }
-        }
-      }
-    }
 
     stage('Deploy with Ansible') {
       steps {
@@ -84,13 +89,13 @@ pipeline {
 
           cat > /tmp/ansible/inventory.ini <<EOF
           [app_servers]
-          app_server ansible_host=${INSTANCE_IP} ansible_user=ubuntu ansible_ssh_private_key_file=${SSH_KEY} ansible_python_interpreter=/usr/bin/python3 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+          app_server ansible_host=$INSTANCE_IP ansible_user=ubuntu ansible_ssh_private_key_file=$SSH_KEY ansible_python_interpreter=/usr/bin/python3 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
           EOF
 
-          export DB_URL="${DB_URL}"
-          export DB_USERNAME="${DB_USERNAME}"
-          export DB_PASSWORD="${DB_PASSWORD}"
-          export SENDGRID_API_KEY="${SENDGRID_API_KEY}"
+          export DB_URL="$DB_URL"
+          export DB_USERNAME="$DB_USERNAME"
+          export DB_PASSWORD="$DB_PASSWORD"
+          export SENDGRID_API_KEY="$SENDGRID_API_KEY"
 
 
           ansible-playbook -i /tmp/ansible/inventory.ini ansible/deploy-playbook.yml
