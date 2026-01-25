@@ -79,12 +79,12 @@ pipeline {
 
     stage('Deploy with Ansible') {
       steps {
-        sh """
+        sh '''
           mkdir -p /tmp/ansible
 
           cat > /tmp/ansible/inventory.ini <<EOF
           [app_servers]
-          app_server ansible_host=${env.INSTANCE_IP} ansible_user=ubuntu ansible_ssh_private_key_file=${SSH_KEY} ansible_python_interpreter=/usr/bin/python3 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+          app_server ansible_host=${INSTANCE_IP} ansible_user=ubuntu ansible_ssh_private_key_file=${SSH_KEY} ansible_python_interpreter=/usr/bin/python3 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
           EOF
 
           export DB_URL="${DB_URL}"
@@ -92,8 +92,9 @@ pipeline {
           export DB_PASSWORD="${DB_PASSWORD}"
           export SENDGRID_API_KEY="${SENDGRID_API_KEY}"
 
+
           ansible-playbook -i /tmp/ansible/inventory.ini ansible/deploy-playbook.yml
-        """
+        '''
       }
     }
 
