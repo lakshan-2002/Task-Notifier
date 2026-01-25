@@ -3,46 +3,69 @@
   become: yes
 
   tasks:
-    - name: Update apt cache
+    - name: Check if Docker is already installed
+      command: docker --version
+      register: docker_installed
+      ignore_errors: yes
+      changed_when: false
+
+    - name: Display Docker status
+      debug:
+        msg: "Docker is {{ 'already installed' if docker_installed.rc == 0 else 'not installed, will install now' }}"
+
+    - name: Update apt cache (only if Docker not installed)
       apt:
         update_cache: yes
         cache_valid_time: 3600
+      when: docker_installed.rc != 0
 
-    - name: Install Docker
+    - name: Install Docker (only if not installed)
       apt:
         name:
           - docker.io
           - curl
         state: present
-        update_cache: yes
+      when: docker_installed.rc != 0
 
-    - name: Start and enable Docker
+    - name: Ensure Docker service is started and enabled
       systemd:
         name: docker
         state: started
         enabled: yes
 
-    - name: Add ubuntu user to docker group
+    - name: Check if ubuntu user is in docker group
+      command: groups ubuntu
+      register: user_groups
+      changed_when: false
+
+    - name: Add ubuntu user to docker group (if not already)
       user:
         name: ubuntu
         groups: docker
         append: yes
+      when: "'docker' not in user_groups.stdout"
 
     - name: Stop and remove existing containers
       shell: |
-        docker stop tasknotifier-backend tasknotifier-frontend || true
-        docker rm tasknotifier-backend tasknotifier-frontend || true
-      ignore_errors: yes
+          docker stop tasknotifier-backend tasknotifier-frontend 2>/dev/null || true
+          docker rm tasknotifier-backend tasknotifier-frontend 2>/dev/null || true
+      changed_when: false
 
     - name: Pull backend image
-      shell: docker pull lakshan2002/tasknotifier-backend:latest
+      community.docker.docker_image:
+        name: lakshan2002/tasknotifier-backend:latest
+        source: pull
       retries: 3
       delay: 10
+      register: backend_pull_result
 
     - name: Pull frontend image
-      shell: docker pull lakshan2002/tasknotifier-frontend:latest
+      community.docker.docker_image:
+        name: lakshan2002/tasknotifier-frontend:latest
+        source: pull
       retries: 3
       delay: 10
+      register: frontend_pull_result
 
     - name: Run backend container
       shell: |
@@ -54,7 +77,7 @@
           -e SPRING_PROFILES_ACTIVE=prod \
           -e Database_Host={{ lookup('env', 'DB_URL') | default('jdbc:mysql://localhost:3306/task_notifier', true) }} \
           -e Database_Username={{ lookup('env', 'DB_USERNAME') | default('root', true) }} \
-          -e Database_Password={{ lookup('env', 'DB_PASSWORD') | default('password', true) }} \
+          -e Database_Password={{ lookup('env', 'DB_PASSWORD') | mandatory('Environment variable DB_PASSWORD must be set') }} \
           -e SENDGRID_API_KEY={{ lookup('env', 'SENDGRID_API_KEY') | default('', true) }} \
           lakshan2002/tasknotifier-backend:latest
 
