@@ -22,11 +22,25 @@ pipeline {
     stage('Build Images') {
       steps {
         sh '''
+           export DOCKER_BUILDKIT=1
+
+           # Pull existing images for cache
+           docker pull lakshan2002/tasknotifier-backend:latest || true
+           docker pull lakshan2002/tasknotifier-frontend:latest || true
+
           echo "Building backend..."
-          docker build -t lakshan2002/tasknotifier-backend:latest -f Dockerfile .
+          docker build \
+            --cache-from lakshan2002/tasknotifier-backend:latest \
+            --build-arg BUILDKIT_INLINE_CACHE=1 \
+            -t lakshan2002/tasknotifier-backend:latest \
+            -f Dockerfile .
 
           echo "Building frontend..."
-          docker build -t lakshan2002/tasknotifier-frontend:latest ReactApp/
+          docker build \
+            --cache-from lakshan2002/tasknotifier-frontend:latest \
+            --build-arg BUILDKIT_INLINE_CACHE=1 \
+            -t lakshan2002/tasknotifier-frontend:latest \
+            ReactApp/
         '''
       }
     }
