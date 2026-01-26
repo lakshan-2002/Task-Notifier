@@ -96,6 +96,7 @@ pipeline {
           export DB_PASSWORD="$DB_PASSWORD"
           export SENDGRID_API_KEY="$SENDGRID_API_KEY"
 
+          echo "Deploying to instance: $INSTANCE_IP"
           ansible-playbook -i /tmp/ansible/inventory.ini ansible/deploy-playbook.yml
         '''
       }
@@ -124,9 +125,9 @@ pipeline {
           ========================================
           Deployment Complete!
           ========================================
-          Frontend: http://$INSTANCE_IP:5173
-          Backend:  http://$INSTANCE_IP:8080
-          Health:   http://$INSTANCE_IP:8080/actuator/health
+          Frontend: http://${env.INSTANCE_IP}:5173
+          Backend:  http://${env.INSTANCE_IP}:8080
+          Health:   http://${env.INSTANCE_IP}:8080/actuator/health
           ========================================
           """
         }
