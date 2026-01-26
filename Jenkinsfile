@@ -10,6 +10,7 @@ pipeline {
     DB_PASSWORD = credentials('db-password')
     SENDGRID_API_KEY = credentials('sendgrid-api-key')
     ANSIBLE_HOST_KEY_CHECKING = 'False'
+    INSTANCE_IP = '44.217.52.15'
   }
 
   stages {
@@ -87,7 +88,7 @@ pipeline {
 
           cat > /tmp/ansible/inventory.ini <<EOF
           [app_servers]
-          app_server ansible_host=44.217.52.15 ansible_user=ubuntu ansible_ssh_private_key_file=$SSH_KEY ansible_python_interpreter=/usr/bin/python3 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+          app_server ansible_host=$INSTANCE_IP ansible_user=ubuntu ansible_ssh_private_key_file=$SSH_KEY ansible_python_interpreter=/usr/bin/python3 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
           EOF
 
           export DB_URL="$DB_URL"
@@ -108,10 +109,10 @@ pipeline {
           sleep 30
 
           echo "Checking backend..."
-          curl -f http://${INSTANCE_IP}:8080 || echo "Backend check failed but continuing..."
+          curl -f http://$INSTANCE_IP:8080 || echo "Backend check failed but continuing..."
 
           echo "Checking frontend..."
-          curl -f http://${INSTANCE_IP}:5173 || echo "Frontend check failed but continuing..."
+          curl -f http://$INSTANCE_IP:5173 || echo "Frontend check failed but continuing..."
         '''
       }
     }
@@ -123,9 +124,9 @@ pipeline {
           ========================================
           Deployment Complete!
           ========================================
-          Frontend: http://${env.INSTANCE_IP}:5173
-          Backend:  http://${env.INSTANCE_IP}:8080
-          Health:   http://${env.INSTANCE_IP}:8080/actuator/health
+          Frontend: http://$INSTANCE_IP:5173
+          Backend:  http://$INSTANCE_IP:8080
+          Health:   http://$INSTANCE_IP:8080/actuator/health
           ========================================
           """
         }
