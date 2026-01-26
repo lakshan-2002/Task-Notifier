@@ -58,26 +58,26 @@ pipeline {
       }
     }
 
-     stage('Get Instance IP from Terraform') {
-       steps {
-         dir('terraform') {
-             sh '''
-               export AWS_ACCESS_KEY_ID=$AWS_CREDENTIALS_USR
-               export AWS_SECRET_ACCESS_KEY=$AWS_CREDENTIALS_PSW
-
-               terraform output -raw instance_public_ip > /tmp/instance_ip.txt
-             '''
-         }
-
-         script {
-           env.INSTANCE_IP = sh(
-             script: 'cat /tmp/instance_ip.txt',
-             returnStdout: true
-           ).trim()
-           echo "Instance IP: ${env.INSTANCE_IP}"
-         }
-       }
-     }
+//      stage('Get Instance IP from Terraform') {
+//        steps {
+//          dir('terraform') {
+//              sh '''
+//                export AWS_ACCESS_KEY_ID=$AWS_CREDENTIALS_USR
+//                export AWS_SECRET_ACCESS_KEY=$AWS_CREDENTIALS_PSW
+//
+//                terraform output -raw instance_public_ip > /tmp/instance_ip.txt
+//              '''
+//          }
+//
+//          script {
+//            env.INSTANCE_IP = sh(
+//              script: 'cat /tmp/instance_ip.txt',
+//              returnStdout: true
+//            ).trim()
+//            echo "Instance IP: ${env.INSTANCE_IP}"
+//          }
+//        }
+//      }
 
 
     stage('Deploy with Ansible') {
@@ -87,7 +87,7 @@ pipeline {
 
           cat > /tmp/ansible/inventory.ini <<EOF
           [app_servers]
-          app_server ansible_host=$INSTANCE_IP ansible_user=ubuntu ansible_ssh_private_key_file=$SSH_KEY ansible_python_interpreter=/usr/bin/python3 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+          app_server ansible_host=44.217.52.15 ansible_user=ubuntu ansible_ssh_private_key_file=$SSH_KEY ansible_python_interpreter=/usr/bin/python3 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
           EOF
 
           export DB_URL="$DB_URL"
