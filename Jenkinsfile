@@ -82,7 +82,7 @@ pipeline {
     stage('Deploy with Ansible') {
       steps {
          sh '''
-         cat /tmp/ansible-inventory.ini
+         cat /tmp/ansible/inventory.ini
     mkdir -p /tmp/ansible
 
     # Create dynamic inventory for Ansible
