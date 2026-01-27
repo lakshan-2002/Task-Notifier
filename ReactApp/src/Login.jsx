@@ -84,7 +84,7 @@ function login() {
       <div className="login-container">
         <div className="login-content">
           <div className="login-header">
-            <h1>Login</h1>
+            <h1>Welcome back</h1>
             <p>Small steps today, big wins tomorrow.</p>
           </div>
 
