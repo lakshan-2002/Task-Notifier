@@ -99,6 +99,7 @@ pipeline {
 //     ls -l "$SSH_KEY"
 //     cat /tmp/ansible/inventory.ini
          sh '''
+            echo "ssh key: $SSH_KEY"
             echo "Deploying to instance: $INSTANCE_IP"
 
             # Run Ansible playbook
