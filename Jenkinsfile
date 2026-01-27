@@ -84,7 +84,7 @@ pipeline {
         // Use withCredentials for the SSH secret file
         withCredentials([file(credentialsId: 'aws-ssh-key', variable: 'SSH_KEY')]) {
           sh '''
-    ssh -i "$SSH_KEY" ubuntu@"$INSTANCE_IP" "echo SSH_OK"
+    ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no ubuntu@"$INSTANCE_IP" "echo SSH_OK"
 
     mkdir -p /tmp/ansible
 
