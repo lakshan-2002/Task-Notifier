@@ -45,16 +45,23 @@
         append: yes
       when: "'docker' not in user_groups.stdout"
 
-    - name: Stop and remove existing containers
+    - name: Stop and remove old backend container
       shell: |
-          docker stop tasknotifier-backend tasknotifier-frontend 2>/dev/null || true
-          docker rm tasknotifier-backend tasknotifier-frontend 2>/dev/null || true
-      changed_when: false
+        docker stop tasknotifier-backend || true
+        docker rm tasknotifier-backend || true
+      ignore_errors: yes
+
+    - name: Stop and remove old frontend container
+      shell: |
+        docker stop tasknotifier-frontend || true
+        docker rm tasknotifier-frontend || true
+      ignore_errors: yes
 
     - name: Pull backend image
       community.docker.docker_image:
         name: lakshan2002/tasknotifier-backend:latest
         source: pull
+        force_source: yes
       retries: 3
       delay: 10
       register: backend_pull_result
@@ -63,6 +70,7 @@
       community.docker.docker_image:
         name: lakshan2002/tasknotifier-frontend:latest
         source: pull
+        force_source: yes
       retries: 3
       delay: 10
       register: frontend_pull_result
