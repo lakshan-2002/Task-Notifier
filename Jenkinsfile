@@ -80,28 +80,37 @@ pipeline {
 //      }
 
    stage('Deploy with Ansible') {
-     steps {
-//       withCredentials([file(credentialsId: 'aws-ssh-key', variable: 'SSH_KEY')]) {
-       sh '''
-         mkdir -p /tmp/ansible
+       steps {
+         withCredentials([file(credentialsId: 'aws-ssh-key', variable: 'SSH_KEY_FILE')]) {
+           sh '''
+             mkdir -p /tmp/ansible
 
-         echo "[app_servers]" > /tmp/ansible/inventory.ini
-         echo "tasknotifier ansible_host=$INSTANCE_IP ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/tasknotifier-key.pem ansible_python_interpreter=/usr/bin/python3 ansible_ssh_common_args='-o StrictHostKeyChecking=no'" >> /tmp/ansible/inventory.ini
+             # Jenkins automatically creates a temp file with the key content
+             # SSH_KEY_FILE points to that temp file
 
-         echo "=== Inventory File ==="
-         cat /tmp/ansible/inventory.ini
-         echo "====================="
+             echo "[app_servers]" > /tmp/ansible/inventory.ini
+             echo "tasknotifier ansible_host=${INSTANCE_IP} ansible_user=ubuntu ansible_ssh_private_key_file=${SSH_KEY_FILE} ansible_python_interpreter=/usr/bin/python3 ansible_ssh_common_args='-o StrictHostKeyChecking=no'" >> /tmp/ansible/inventory.ini
 
-         echo "Testing Ansible connection..."
-         ansible tasknotifier -i /tmp/ansible/inventory.ini -m ping
+             echo "Inventory created:"
+             cat /tmp/ansible/inventory.ini
 
-         echo "Deploying application..."
-         ansible-playbook -i /tmp/ansible/inventory.ini ansible/deploy-playbook.yml -vv
+             # Verify SSH key file exists and has correct permissions
+             echo "Checking SSH key:"
+             ls -la ${SSH_KEY_FILE}
 
-         echo "Deployment complete!"
-       '''
-      }
-   }
+             # Test SSH connection directly first
+             echo "Testing direct SSH connection:"
+             ssh -i ${SSH_KEY_FILE} -o StrictHostKeyChecking=no ubuntu@${INSTANCE_IP} "echo 'SSH connection successful!'"
+
+             echo "Testing Ansible connection:"
+             ansible tasknotifier -i /tmp/ansible/inventory.ini -m ping
+
+             echo "Deploying application:"
+             ansible-playbook -i /tmp/ansible/inventory.ini ansible/deploy-playbook.yml -vv
+           '''
+         }
+       }
+     }
 
 
 
