@@ -84,16 +84,20 @@ pipeline {
        sh '''
          mkdir -p /tmp/ansible
 
-         cat > /tmp/ansible/inventory.ini <<EOF
-   [app_servers]
-   tasknotifier ansible_host=$INSTANCE_IP ansible_user=ubuntu ansible_ssh_private_key_file=$SSH_KEY ansible_python_interpreter=/usr/bin/python3 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
-   EOF
+         echo "[app_servers]" > /tmp/ansible/inventory.ini
+         echo "tasknotifier ansible_host=$INSTANCE_IP ansible_user=ubuntu ansible_ssh_private_key_file=$SSH_KEY ansible_python_interpreter=/usr/bin/python3 ansible_ssh_common_args='-o StrictHostKeyChecking=no'" >> /tmp/ansible/inventory.ini
 
+         echo "=== Inventory File ==="
          cat /tmp/ansible/inventory.ini
+         echo "====================="
 
+         echo "Testing Ansible connection..."
          ansible tasknotifier -i /tmp/ansible/inventory.ini -m ping
 
+         echo "Deploying application..."
          ansible-playbook -i /tmp/ansible/inventory.ini ansible/deploy-playbook.yml -vv
+
+         echo "Deployment complete!"
        '''
      }
    }
