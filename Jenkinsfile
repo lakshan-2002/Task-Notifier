@@ -105,7 +105,6 @@ pipeline {
             ansible-playbook -i /tmp/ansible/inventory.ini ansible/deploy-playbook.yml
          '''
         }
-      }
     }
 
 
