@@ -82,10 +82,10 @@ pipeline {
     stage('Deploy with Ansible') {
       steps {
          sh '''
-    mkdir -p /tmp/ansible
+//     mkdir -p /tmp/ansible
 
     # Create dynamic inventory for Ansible
-    cat > /tmp/ansible/inventory.ini <<EOF
+    cat > /tmp/ansible-inventory.ini <<EOF
     [app_servers]
     tasknotifier ansible_host=$INSTANCE_IP ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/tasknotifier-key.pem ansible_python_interpreter=/usr/bin/python3 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
     EOF
@@ -93,7 +93,7 @@ pipeline {
     echo "Deploying to instance: $INSTANCE_IP"
 
     # Run Ansible playbook
-    ansible-playbook -i /tmp/ansible/inventory.ini ansible/deploy-playbook.yml
+    ansible-playbook -i /tmp/ansible-inventory.ini ansible/deploy-playbook.yml
 
             '''
         }
