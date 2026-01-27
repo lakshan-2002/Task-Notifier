@@ -81,12 +81,12 @@ pipeline {
 
    stage('Deploy with Ansible') {
      steps {
-      withCredentials([file(credentialsId: 'aws-ssh-key', variable: 'SSH_KEY')]) {
+//       withCredentials([file(credentialsId: 'aws-ssh-key', variable: 'SSH_KEY')]) {
        sh '''
          mkdir -p /tmp/ansible
 
          echo "[app_servers]" > /tmp/ansible/inventory.ini
-         echo "tasknotifier ansible_host=$INSTANCE_IP ansible_user=ubuntu ansible_ssh_private_key_file=$SSH_KEY ansible_python_interpreter=/usr/bin/python3 ansible_ssh_common_args='-o StrictHostKeyChecking=no'" >> /tmp/ansible/inventory.ini
+         echo "tasknotifier ansible_host=$INSTANCE_IP ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/tasknotifier-key.pem ansible_python_interpreter=/usr/bin/python3 ansible_ssh_common_args='-o StrictHostKeyChecking=no'" >> /tmp/ansible/inventory.ini
 
          echo "=== Inventory File ==="
          cat /tmp/ansible/inventory.ini
@@ -101,7 +101,6 @@ pipeline {
          echo "Deployment complete!"
        '''
       }
-     }
    }
 
 
