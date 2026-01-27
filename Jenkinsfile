@@ -4,6 +4,7 @@ pipeline {
   environment {
     DOCKERHUB_CREDS = credentials('dockerhub-creds')
     AWS_CREDENTIALS = credentials('aws-credentials')
+    SSH_KEY = credentials('aws-ssh-key')
     DB_URL = credentials('db-url')
     DB_USERNAME = credentials('db-username')
     DB_PASSWORD = credentials('db-password')
