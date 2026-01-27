@@ -79,48 +79,35 @@ pipeline {
 //        }
 //      }
 
-    stage('Check Agent Tools') {
-      steps {
-        sh '''
-          echo "Who am I?"
-          whoami
-
-          echo "Which machine is this?"
-          hostname
-
-          echo "Check Ansible"
-          ansible --version || echo "Ansible NOT installed"
-
-          echo "Check SSH"
-          ssh -V
-        '''
-      }
-    }
-
-
     stage('Deploy with Ansible') {
       steps {
+        // Use withCredentials for the SSH secret file
         withCredentials([file(credentialsId: 'aws-ssh-key', variable: 'SSH_KEY')]) {
           sh '''
-    ssh -i $SSH_KEY ubuntu@$INSTANCE_IP "echo SSH_OK"
+    ssh -i "$SSH_KEY" ubuntu@"$INSTANCE_IP" "echo SSH_OK"
+
     mkdir -p /tmp/ansible
 
+    # Create dynamic inventory for Ansible
     cat > /tmp/ansible/inventory.ini <<EOF
     [app_servers]
     app_server ansible_host=$INSTANCE_IP ansible_user=ubuntu ansible_ssh_private_key_file=$SSH_KEY ansible_python_interpreter=/usr/bin/python3 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
     EOF
 
-    export DB_URL="$DB_URL"
-    export DB_USERNAME="$DB_USERNAME"
-    export DB_PASSWORD="$DB_PASSWORD"
-    export SENDGRID_API_KEY="$SENDGRID_API_KEY"
+    # Optional: Print SSH key path and inventory file for debugging
+    echo "SSH key path: $SSH_KEY"
+    ls -l "$SSH_KEY"
+    cat /tmp/ansible/inventory.ini
 
     echo "Deploying to instance: $INSTANCE_IP"
+
+    # Run Ansible playbook
     ansible-playbook -i /tmp/ansible/inventory.ini ansible/deploy-playbook.yml
     '''
         }
       }
     }
+
 
 
 
