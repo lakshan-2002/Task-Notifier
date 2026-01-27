@@ -102,6 +102,7 @@ pipeline {
     stage('Deploy with Ansible') {
       steps {
         sh '''
+    ssh -i $SSH_KEY ubuntu@$INSTANCE_IP "echo SSH_OK"
     mkdir -p /tmp/ansible
 
     cat > /tmp/ansible/inventory.ini <<EOF
