@@ -80,8 +80,8 @@ pipeline {
 //      }
 
     stage('Deploy with Ansible') {
-     WithCredentials([sshUserPrivateKey(credentialsId: 'aws-ssh-key', keyFileVariable: 'SSH_KEY')]) {
       steps {
+        WithCredentials([sshUserPrivateKey(credentialsId: 'aws-ssh-key', keyFileVariable: 'SSH_KEY')]) {
          sh '''
            mkdir -p /tmp/ansible
 
@@ -98,6 +98,7 @@ pipeline {
            ansible-playbook -i /tmp/ansible/inventory.ini ansible/deploy-playbook.yml
 
          '''
+
         }
       }
     }
