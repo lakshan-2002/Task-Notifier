@@ -81,29 +81,29 @@ pipeline {
 
     stage('Deploy with Ansible') {
       steps {
-        // Use withCredentials for the SSH secret file
-        withCredentials([file(credentialsId: 'aws-ssh-key', variable: 'SSH_KEY')]) {
-          sh '''
-    ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no ubuntu@"$INSTANCE_IP" "echo SSH_OK"
+//         // Use withCredentials for the SSH secret file
+//         withCredentials([file(credentialsId: 'aws-ssh-key', variable: 'SSH_KEY')]) {
+//           sh '''
+//     ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no ubuntu@"$INSTANCE_IP" "echo SSH_OK"
+//
+//     mkdir -p /tmp/ansible
+//
+//     # Create dynamic inventory for Ansible
+//     cat > /tmp/ansible/inventory.ini <<EOF
+//     [app_servers]
+//     app_server ansible_host=$INSTANCE_IP ansible_user=ubuntu ansible_ssh_private_key_file=$SSH_KEY ansible_python_interpreter=/usr/bin/python3 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+//     EOF
+//
+//     # Optional: Print SSH key path and inventory file for debugging
+//     echo "SSH key path: $SSH_KEY"
+//     ls -l "$SSH_KEY"
+//     cat /tmp/ansible/inventory.ini
+         sh '''
+            echo "Deploying to instance: $INSTANCE_IP"
 
-    mkdir -p /tmp/ansible
-
-    # Create dynamic inventory for Ansible
-    cat > /tmp/ansible/inventory.ini <<EOF
-    [app_servers]
-    app_server ansible_host=$INSTANCE_IP ansible_user=ubuntu ansible_ssh_private_key_file=$SSH_KEY ansible_python_interpreter=/usr/bin/python3 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
-    EOF
-
-    # Optional: Print SSH key path and inventory file for debugging
-    echo "SSH key path: $SSH_KEY"
-    ls -l "$SSH_KEY"
-    cat /tmp/ansible/inventory.ini
-
-    echo "Deploying to instance: $INSTANCE_IP"
-
-    # Run Ansible playbook
-    ansible-playbook -i /tmp/ansible/inventory.ini ansible/deploy-playbook.yml
-    '''
+            # Run Ansible playbook
+            ansible-playbook -i /tmp/ansible/inventory.ini ansible/deploy-playbook.yml
+         '''
         }
       }
     }
