@@ -80,6 +80,24 @@ pipeline {
 //        }
 //      }
 
+    stage('Check Agent Tools') {
+      steps {
+        sh '''
+          echo "Who am I?"
+          whoami
+
+          echo "Which machine is this?"
+          hostname
+
+          echo "Check Ansible"
+          ansible --version || echo "Ansible NOT installed"
+
+          echo "Check SSH"
+          ssh -V
+        '''
+      }
+    }
+
 
     stage('Deploy with Ansible') {
       steps {
