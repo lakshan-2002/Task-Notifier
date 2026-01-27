@@ -79,38 +79,45 @@ pipeline {
 //        }
 //      }
 
-   stage('Deploy with Ansible') {
-       steps {
-         withCredentials([file(credentialsId: 'aws-ssh-key', variable: 'SSH_KEY_FILE')]) {
-           sh '''
-             mkdir -p /tmp/ansible
+   stage('Setup SSH Key') {
+     steps {
+       withCredentials([file(credentialsId: 'aws-ssh-key', variable: 'SSH_KEY_FILE')]) {
+         sh '''
+           # Copy the credential file to a known location
+           mkdir -p ${WORKSPACE}/.ssh
+           cp ${SSH_KEY_FILE} ${WORKSPACE}/.ssh/tasknotifier-key.pem
+           chmod 600 ${WORKSPACE}/.ssh/tasknotifier-key.pem
 
-             # Jenkins automatically creates a temp file with the key content
-             # SSH_KEY_FILE points to that temp file
-
-             echo "[app_servers]" > /tmp/ansible/inventory.ini
-             echo "tasknotifier ansible_host=${INSTANCE_IP} ansible_user=ubuntu ansible_ssh_private_key_file=${SSH_KEY_FILE} ansible_python_interpreter=/usr/bin/python3 ansible_ssh_common_args='-o StrictHostKeyChecking=no'" >> /tmp/ansible/inventory.ini
-
-             echo "Inventory created:"
-             cat /tmp/ansible/inventory.ini
-
-             # Verify SSH key file exists and has correct permissions
-             echo "Checking SSH key:"
-             ls -la ${SSH_KEY_FILE}
-
-             # Test SSH connection directly first
-             echo "Testing direct SSH connection:"
-             ssh -i ${SSH_KEY_FILE} -o StrictHostKeyChecking=no ubuntu@${INSTANCE_IP} "echo 'SSH connection successful!'"
-
-             echo "Testing Ansible connection:"
-             ansible tasknotifier -i /tmp/ansible/inventory.ini -m ping
-
-             echo "Deploying application:"
-             ansible-playbook -i /tmp/ansible/inventory.ini ansible/deploy-playbook.yml -vv
-           '''
-         }
+           echo "SSH key copied to workspace"
+           ls -la ${WORKSPACE}/.ssh/
+         '''
        }
      }
+   }
+
+   stage('Deploy with Ansible') {
+     steps {
+       sh '''
+         mkdir -p /tmp/ansible
+
+         SSH_KEY_PATH="${WORKSPACE}/.ssh/tasknotifier-key.pem"
+
+         echo "[app_servers]" > /tmp/ansible/inventory.ini
+         echo "tasknotifier ansible_host=${INSTANCE_IP} ansible_user=ubuntu ansible_ssh_private_key_file=${SSH_KEY_PATH} ansible_python_interpreter=/usr/bin/python3 ansible_ssh_common_args='-o StrictHostKeyChecking=no'" >> /tmp/ansible/inventory.ini
+
+         cat /tmp/ansible/inventory.ini
+
+         ansible tasknotifier -i /tmp/ansible/inventory.ini -m ping
+
+         export DB_URL = "${DB_URL}"
+         export DB_USERNAME = "${DB_USERNAME}"
+         export DB_PASSWORD = "${DB_PASSWORD}"
+         export SENDGRID_API_KEY = "${SENDGRID_API_KEY}"
+
+         ansible-playbook -i /tmp/ansible/inventory.ini ansible/deploy-playbook.yml -vv
+       '''
+     }
+   }
 
 
 
