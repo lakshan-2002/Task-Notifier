@@ -80,7 +80,7 @@ pipeline {
 //      }
 
     stage('Deploy with Ansible') {
-    WithCredentials([sshUserPrivateKey(credentialsId: 'aws-ssh-key', keyFileVariable: 'SSH_KEY')]) {
+     WithCredentials([sshUserPrivateKey(credentialsId: 'aws-ssh-key', keyFileVariable: 'SSH_KEY')]) {
       steps {
          sh '''
            mkdir -p /tmp/ansible
@@ -99,6 +99,7 @@ pipeline {
 
          '''
         }
+      }
     }
 
 
