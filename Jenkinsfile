@@ -81,25 +81,38 @@ pipeline {
 
     stage('Deploy with Ansible') {
       steps {
-        withCredentials([file(credentialsId: 'aws-ssh-key', variable: 'SSH_KEY')]) {
-         sh '''
-           mkdir -p /tmp/ansible
+        sh '''
+          #!/bin/bash
+          set -e  # Exit on error
+          set -o pipefail  # Catch pipe errors
 
-           # Create dynamic inventory for Ansible
-           cat > /tmp/ansible/inventory.ini <<EOF
-           [app_servers]
-           tasknotifier ansible_host=$INSTANCE_IP ansible_user=ubuntu ansible_ssh_private_key_file=$SSH_KEY ansible_python_interpreter=/usr/bin/python3 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
-           EOF
+          echo "Starting deployment..."
 
-           cat /tmp/ansible/inventory.ini
-           echo "Deploying to instance: $INSTANCE_IP"
+          # Create inventory
+          mkdir -p /tmp/ansible
+          cat > /tmp/ansible/inventory.ini <<'EOF'
+    [app_servers]
+    tasknotifier ansible_host=${INSTANCE_IP} ansible_user=ubuntu ansible_ssh_private_key_file=${SSH_KEY} ansible_python_interpreter=/usr/bin/python3 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+    EOF
 
-           # Run Ansible playbook
-           ansible-playbook -i /tmp/ansible/inventory.ini ansible/deploy-playbook.yml
+          # Substitute environment variables
+          sed -i "s|\${INSTANCE_IP}|$INSTANCE_IP|g" /tmp/ansible/inventory.ini
+          sed -i "s|\${SSH_KEY}|$SSH_KEY|g" /tmp/ansible/inventory.ini
 
-         '''
+          echo "=== Inventory ==="
+          cat /tmp/ansible/inventory.ini
 
-        }
+          echo "=== SSH Key Check ==="
+          ls -la $SSH_KEY || echo "SSH key not found!"
+
+          echo "=== Ansible Ping ==="
+          ansible tasknotifier -i /tmp/ansible/inventory.ini -m ping
+
+          echo "=== Running Playbook ==="
+          ansible-playbook -i /tmp/ansible/inventory.ini ansible/deploy-playbook.yml -vv
+
+          echo "=== Deployment Complete ==="
+        '''
       }
     }
 
