@@ -82,16 +82,16 @@ pipeline {
 
    stage('Deploy with Ansible') {
      steps {
+       script {
+         def inventory = """[app_servers]
+   tasknotifier ansible_host=${env.INSTANCE_IP} ansible_user=ubuntu ansible_ssh_private_key_file=${env.SSH_KEY} ansible_python_interpreter=/usr/bin/python3 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+   """
+
+         sh 'mkdir -p /tmp/ansible'
+         writeFile file: '/tmp/ansible/inventory.ini', text: inventory
+       }
+
        sh '''
-         mkdir -p /tmp/ansible
-
-         echo "[app_servers]" > /tmp/ansible/inventory.ini
-         echo "tasknotifier ansible_host=$INSTANCE_IP ansible_user=ubuntu ansible_ssh_private_key_file=$SSH_KEY ansible_python_interpreter=/usr/bin/python3 ansible_ssh_common_args='-o StrictHostKeyChecking=no'" >> /tmp/ansible/inventory.ini
-
-         echo "=== Inventory File ==="
-         cat /tmp/ansible/inventory.ini
-         echo "====================="
-
          echo "Testing Ansible connection..."
          ansible tasknotifier -i /tmp/ansible/inventory.ini -m ping
 
