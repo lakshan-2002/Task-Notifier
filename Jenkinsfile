@@ -4,7 +4,6 @@ pipeline {
   environment {
     DOCKERHUB_CREDS = credentials('dockerhub-creds')
     AWS_CREDENTIALS = credentials('aws-credentials')
-    SSH_KEY = credentials('aws-ssh-key')
     DB_URL = credentials('db-url')
     DB_USERNAME = credentials('db-username')
     DB_PASSWORD = credentials('db-password')
@@ -101,7 +100,8 @@ pipeline {
 
     stage('Deploy with Ansible') {
       steps {
-        sh '''
+        withCredentials([file(credentialsId: 'aws-ssh-key', variable: 'SSH_KEY')]) {
+          sh '''
     ssh -i $SSH_KEY ubuntu@$INSTANCE_IP "echo SSH_OK"
     mkdir -p /tmp/ansible
 
