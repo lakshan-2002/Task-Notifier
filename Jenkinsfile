@@ -81,7 +81,7 @@ pipeline {
 
     stage('Deploy with Ansible') {
       steps {
-        WithCredentials([sshUserPrivateKey(credentialsId: 'aws-ssh-key', keyFileVariable: 'SSH_KEY')]) {
+        withCredentials([file(credentialsId: 'aws-ssh-key', variable: 'SSH_KEY')]) {
          sh '''
            mkdir -p /tmp/ansible
 
