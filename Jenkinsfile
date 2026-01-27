@@ -118,6 +118,7 @@ pipeline {
     echo "Deploying to instance: $INSTANCE_IP"
     ansible-playbook -i /tmp/ansible/inventory.ini ansible/deploy-playbook.yml
     '''
+        }
       }
     }
 
