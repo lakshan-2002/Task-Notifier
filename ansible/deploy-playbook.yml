@@ -87,7 +87,6 @@
           -e Database_Username={{ lookup('env', 'DB_USERNAME') | default('root', true) }} \
           -e Database_Password={{ lookup('env', 'DB_PASSWORD') | mandatory('Environment variable DB_PASSWORD must be set') }} \
           -e SENDGRID_API_KEY={{ lookup('env', 'SENDGRID_API_KEY') | default('', true) }} \
-          lakshan2002/tasknotifier-backend:latest
 
     - name: Wait for backend
       wait_for:
