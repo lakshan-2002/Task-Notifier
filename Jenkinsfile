@@ -121,10 +121,10 @@ pipeline {
                 '''
 
                 sh """
+                    export ANSIBLE_SSH_ARGS='-o StrictHostKeyChecking=no'
                     ansible-playbook -i $inventoryFile \
                         --user=$SSH_USER \
                         --private-key=$SSH_KEY_PATH \
-                        --ssh-common-args='-o StrictHostKeyChecking=no' \
                         deploy-playbook.yml
                 """
 
