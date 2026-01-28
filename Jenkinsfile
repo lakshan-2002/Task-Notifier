@@ -111,24 +111,20 @@ pipeline {
             )]) {
                 // The variables SSH_KEY_PATH and SSH_USER are now available within this block
 
+                def inventoryFile = '/tmp/ansible/inventory.ini'
 
-                sh '''
-                    def inventoryFile = '/tmp/ansible/inventory.ini'
-                '''
+                export DB_URL=$DB_URL
+                export DB_USERNAME=$DB_USERNAME
+                export DB_PASSWORD=$DB_PASSWORD
+                export SENDGRID_API_KEY=$SENDGRID_API_KEY
 
-                // Execute the ansible-playbook command, passing the variables correctly
-                sh '''
-                    export DB_URL=$DB_URL
-                    export DB_USERNAME=$DB_USERNAME
-                    export DB_PASSWORD=$DB_PASSWORD
-                    export SENDGRID_API_KEY=$SENDGRID_API_KEY
-
+                sh """
                     ansible-playbook -i $inventoryFile \
                         --user=$SSH_USER \
                         --private-key=$SSH_KEY_PATH \
                         -o StrictHostKeyChecking=no \
                         deploy-playbook.yml
-                '''
+                """
 
             }
          }
