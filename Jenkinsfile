@@ -113,10 +113,12 @@ pipeline {
 
                 def inventoryFile = '/tmp/ansible/inventory.ini'
 
-                export DB_URL=$DB_URL
-                export DB_USERNAME=$DB_USERNAME
-                export DB_PASSWORD=$DB_PASSWORD
-                export SENDGRID_API_KEY=$SENDGRID_API_KEY
+                sh '''
+                    export DB_URL=$DB_URL
+                    export DB_USERNAME=$DB_USERNAME
+                    export DB_PASSWORD=$DB_PASSWORD
+                    export SENDGRID_API_KEY=$SENDGRID_API_KEY
+                '''
 
                 sh """
                     ansible-playbook -i $inventoryFile \
