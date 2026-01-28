@@ -116,16 +116,15 @@ pipeline {
 
                 // Execute the ansible-playbook command, passing the variables correctly
                 sh '''
-                     export DB_URL = $DB_URL
-                     export DB_USERNAME = $DB_USERNAME
-                     export DB_PASSWORD = $DB_PASSWORD
-                     export SENDGRID_API_KEY = $SENDGRID_API_KEY
-
-                     ansible-playbook -i $inventoryFile \
-                         --user=$SSH_USER \
-                         --private-key=$SSH_KEY_PATH \
-                         -o StrictHostKeyChecking=no \
-                         deploy-playbook.yml
+                     ansible-playbook -i $inventoryFile
+                          --user=$SSH_USER
+                          --private-key=$SSH_KEY_PATH
+                          -o StrictHostKeyChecking=no
+                          -e "db_url=$DB_URL"
+                          -e "db_username=$DB_USERNAME"
+                          -e "db_password=$DB_PASSWORD"
+                          -e "sendgrid_api_key=$SENDGRID_API_KEY"
+                          deploy-playbook.yml
                 '''
             }
          }
