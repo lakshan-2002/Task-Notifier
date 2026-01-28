@@ -125,7 +125,7 @@ pipeline {
                     ansible-playbook -i $inventoryFile \
                         --user=$SSH_USER \
                         --private-key=$SSH_KEY_PATH \
-                        deploy-playbook.yml
+                        ansible/deploy-playbook.yml
                 """
 
             }
