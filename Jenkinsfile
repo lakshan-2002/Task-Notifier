@@ -100,6 +100,7 @@ pipeline {
     stage('Deploy Ansible Playbook') {
       steps {
          script {
+           dir('ansible'){
             // Define the credential ID
             def credentialId = 'aws-ssh-key'
 
@@ -109,27 +110,25 @@ pipeline {
                 keyFileVariable: 'SSH_KEY_PATH',
                 usernameVariable: 'SSH_USER'
             )]) {
-                // The variables SSH_KEY_PATH and SSH_USER are now available within this block
-
-                def inventoryFile = '/tmp/ansible/inventory.ini'
-
                 sh '''
+                    inventoryFile="/tmp/ansible_inventory.ini"
+
+                    cat > ${inventoryFile} <<EOL
+                    [app_servers]
+                    tasknotifier ansible_host=$INSTANCE_IP ansible_user=$SSH_USER ansible_ssh_private_key_file=$SSH_KEY_PATH ansible_python_interpreter=/usr/bin/python3 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+                    EOL
+
                     export DB_URL=$DB_URL
                     export DB_USERNAME=$DB_USERNAME
                     export DB_PASSWORD=$DB_PASSWORD
                     export SENDGRID_API_KEY=$SENDGRID_API_KEY
+
+                    ansible tasknotifier -i ${inventoryFile} -m ping
+
+                    ansible-playbook -i ${inventoryFile} deploy-playbook.yml -vv
                 '''
-
-                sh """
-                    cd ansible
-                    export ANSIBLE_SSH_ARGS='-o StrictHostKeyChecking=no'
-                    ansible-playbook -i ${inventoryFile} \
-                        --user=${SSH_USER} \
-                        --private-key=${SSH_KEY_PATH} \
-                        deploy-playbook.yml
-                """
-
             }
+           }
          }
       }
     }
