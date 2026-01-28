@@ -114,7 +114,6 @@ pipeline {
                 def inventoryFile = '/tmp/ansible/inventory.ini'
 
                 sh '''
-                    cat tmp/ansible/inventory.ini
                     export DB_URL=$DB_URL
                     export DB_USERNAME=$DB_USERNAME
                     export DB_PASSWORD=$DB_PASSWORD
