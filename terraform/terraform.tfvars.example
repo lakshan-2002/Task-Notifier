@@ -1,0 +1,3 @@
+aws_region          = "aws-region"
+instance_type       = "Instance type"
+key_name            = "Your key-name"

@@ -19,6 +19,10 @@ target/
 *.iml
 *.ipr
 
+# Terraform
+**/.terraform/*
+*.tfvars
+
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
