@@ -121,11 +121,14 @@ pipeline {
                 '''
 
                 sh """
+                    pwd
+                    ls -la
+                    ls -la deploy-playbook.yml
                     export ANSIBLE_SSH_ARGS='-o StrictHostKeyChecking=no'
                     ansible-playbook -i $inventoryFile \
                         --user=$SSH_USER \
                         --private-key=$SSH_KEY_PATH \
-                        ansible/deploy-playbook.yml
+                        deploy-playbook.yml
                 """
 
             }
