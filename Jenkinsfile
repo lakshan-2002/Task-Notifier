@@ -124,7 +124,7 @@ pipeline {
                     ansible-playbook -i $inventoryFile \
                         --user=$SSH_USER \
                         --private-key=$SSH_KEY_PATH \
-                        -o StrictHostKeyChecking=no \
+                        --ssh-common-args='-o StrictHostKeyChecking=no' \
                         deploy-playbook.yml
                 """
 
