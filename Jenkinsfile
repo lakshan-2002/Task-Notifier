@@ -111,8 +111,10 @@ pipeline {
             )]) {
                 // The variables SSH_KEY_PATH and SSH_USER are now available within this block
 
-                // Define your inventory file path (if static)
-                def inventoryFile = '/tmp/ansible/inventory.ini'
+
+                sh '''
+                    def inventoryFile = '/tmp/ansible/inventory.ini'
+                '''
 
                 // Execute the ansible-playbook command, passing the variables correctly
                 sh '''
