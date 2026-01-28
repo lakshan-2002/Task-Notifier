@@ -114,7 +114,7 @@ pipeline {
                     inventoryFile="/tmp/ansible_inventory.ini"
                     cat ${inventoryFile}
 
-                    chmod 744 inventoryFile
+                    chmod 744 ${inventoryFile}
 
                     export DB_URL=$DB_URL
                     export DB_USERNAME=$DB_USERNAME
