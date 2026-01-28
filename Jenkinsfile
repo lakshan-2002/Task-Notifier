@@ -121,9 +121,7 @@ pipeline {
                 '''
 
                 sh """
-                    pwd
-                    ls -la ansible/
-                    ls -la deploy-playbook.yml
+                    cd ansible
                     export ANSIBLE_SSH_ARGS='-o StrictHostKeyChecking=no'
                     ansible-playbook -i $inventoryFile \
                         --user=$SSH_USER \
