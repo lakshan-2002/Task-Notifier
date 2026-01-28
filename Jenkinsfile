@@ -122,7 +122,7 @@ pipeline {
 
                 sh """
                     pwd
-                    ls -la
+                    ls -la ansible/
                     ls -la deploy-playbook.yml
                     export ANSIBLE_SSH_ARGS='-o StrictHostKeyChecking=no'
                     ansible-playbook -i $inventoryFile \
