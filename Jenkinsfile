@@ -113,10 +113,9 @@ pipeline {
                 sh '''
                     inventoryFile="/tmp/ansible_inventory.ini"
 
-                    cat > ${inventoryFile} <<EOL
-                    [app_servers]
-                    tasknotifier ansible_host=$INSTANCE_IP ansible_user=$SSH_USER ansible_ssh_private_key_file=$SSH_KEY_PATH ansible_python_interpreter=/usr/bin/python3 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
-                    EOL
+                    echo "[app_servers]" > ${inventoryFile}
+                    echo "tasknotifier ansible_host=${INSTANCE_IP} ansible_user=${SSH_USER} ansible_ssh_private_key_file=${SSH_KEY_PATH} ansible_python_interpreter=/usr/bin/python3 ansible_ssh_common_args='-o StrictHostKeyChecking=no'" >> ${inventoryFile}
+                    cat ${inventoryFile}
 
                     export DB_URL=$DB_URL
                     export DB_USERNAME=$DB_USERNAME
