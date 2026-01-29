@@ -81,22 +81,40 @@ pipeline {
     stage('Generate Inventory File') {
         steps {
             script {
-                // Get the EC2 instance IP from Terraform output
+                // Initialize Terraform and get instance IP
+                sh '''
+                    export AWS_ACCESS_KEY_ID=$AWS_CREDENTIALS_USR
+                    export AWS_SECRET_ACCESS_KEY=$AWS_CREDENTIALS_PSW
+                    cd terraform
+                    terraform init -reconfigure
+                '''
+
                 def instanceIP = sh(
-                    script: 'cd terraform && terraform output -raw instance_public_ip',
+                    script: '''
+                        export AWS_ACCESS_KEY_ID=$AWS_CREDENTIALS_USR
+                        export AWS_SECRET_ACCESS_KEY=$AWS_CREDENTIALS_PSW
+                        cd terraform && terraform output -raw instance_public_ip
+                    ''',
                     returnStdout: true
                 ).trim()
 
                 echo "Instance IP: ${instanceIP}"
+                env.INSTANCE_IP = instanceIP
 
                 // Generate inventory file from template
-                sh """
-                    sed 's|INSTANCE_IP_PLACEHOLDER|${instanceIP}|g; s|SSH_KEY_PATH_PLACEHOLDER|${SSH_KEY_PATH}|g' \
-                        ansible/inventory.ini.template > ansible/inventory.ini
+                withCredentials([sshUserPrivateKey(
+                    credentialsId: 'aws-ssh-key',
+                    keyFileVariable: 'SSH_KEY_PATH'
+                )]) {
+                    sh """
+                        mkdir -p /tmp/ansible
+                        sed 's|INSTANCE_IP_PLACEHOLDER|${instanceIP}|g; s|SSH_KEY_PATH_PLACEHOLDER|'"\${SSH_KEY_PATH}"'|g' \
+                            ansible/inventory.ini.template > /tmp/ansible/inventory.ini
 
-                    echo "Generated inventory file:"
-                    cat ansible/inventory.ini
-                """
+                        echo "Generated inventory file:"
+                        cat /tmp/ansible/inventory.ini
+                    """
+                }
             }
         }
     }
@@ -105,17 +123,15 @@ pipeline {
       steps {
          script {
            dir('ansible'){
-            // Define the credential ID
-            def credentialId = 'aws-ssh-key'
-
-            // Use withCredentials to get the temporary file path and username
             withCredentials([sshUserPrivateKey(
-                credentialsId: credentialId,
+                credentialsId: 'aws-ssh-key',
                 keyFileVariable: 'SSH_KEY_PATH',
                 usernameVariable: 'SSH_USER'
             )]) {
                 sh '''
-                    inventoryFile="/tmp/ansible_inventory.ini"
+                    inventoryFile="/tmp/ansible/inventory.ini"
+
+                    echo "Using inventory file:"
                     cat ${inventoryFile}
 
                     export DB_URL=$DB_URL
@@ -123,8 +139,10 @@ pipeline {
                     export DB_PASSWORD=$DB_PASSWORD
                     export SENDGRID_API_KEY=$SENDGRID_API_KEY
 
+                    echo "Testing connectivity..."
                     ansible tasknotifier -i ${inventoryFile} -m ping
 
+                    echo "Running playbook..."
                     ansible-playbook -i ${inventoryFile} deploy-playbook.yml -vv
                 '''
             }
