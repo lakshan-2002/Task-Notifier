@@ -23,6 +23,9 @@ target/
 **/.terraform/*
 *.tfvars
 
+# Ansible
+ansible/inventory.ini
+
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
