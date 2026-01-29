@@ -9,6 +9,7 @@ pipeline {
     DB_PASSWORD = credentials('db-password')
     SENDGRID_API_KEY = credentials('sendgrid-api-key')
     ANSIBLE_HOST_KEY_CHECKING = 'False'
+    INSTANCE_IP = '44.217.52.15'
   }
 
   stages {
@@ -77,28 +78,6 @@ pipeline {
 //          }
 //        }
 //      }
-
-    stage('Get Instance IP') {
-        steps {
-            script {
-                echo "Reading instance IP from terraform/instance_ip.txt..."
-
-                // Read the IP from the file saved by terraform
-                def instanceIP = sh(
-                    script: 'cat terraform/instance_ip.txt',
-                    returnStdout: true
-                ).trim()
-
-                if (instanceIP == null || instanceIP.isEmpty() || !instanceIP.matches("^[0-9\\.]+\$")) {
-                    error("Could not read valid instance IP from terraform/instance_ip.txt\n" +
-                          "Please ensure the file exists and contains your EC2 instance IP address.")
-                }
-
-                echo "Instance IP: ${instanceIP}"
-                env.INSTANCE_IP = instanceIP
-            }
-        }
-    }
 
     stage('Generate Inventory File') {
         steps {
