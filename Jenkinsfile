@@ -87,18 +87,18 @@ pipeline {
                     credentialsId: 'aws-ssh-key',
                     keyFileVariable: 'SSH_KEY_PATH'
                 )]) {
-                    sh '''
+                    sh """
                         mkdir -p /tmp/ansible
 
                         # Create inventory file directly to avoid sed issues with special characters
-                        cat > /tmp/ansible/inventory.ini << EOF
+                        cat > /tmp/ansible/inventory.ini << 'EOF'
 [app_servers]
-tasknotifier ansible_host=${INSTANCE_IP} ansible_user=ubuntu ansible_ssh_private_key_file=${SSH_KEY_PATH} ansible_python_interpreter=/usr/bin/python3 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+tasknotifier ansible_host=${INSTANCE_IP} ansible_user=ubuntu ansible_ssh_private_key_file=\${SSH_KEY_PATH} ansible_python_interpreter=/usr/bin/python3 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
 EOF
 
                         echo "Generated inventory file:"
                         cat /tmp/ansible/inventory.ini
-                    '''
+                    """
                 }
             }
         }
