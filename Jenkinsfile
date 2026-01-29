@@ -9,7 +9,6 @@ pipeline {
     DB_PASSWORD = credentials('db-password')
     SENDGRID_API_KEY = credentials('sendgrid-api-key')
     ANSIBLE_HOST_KEY_CHECKING = 'False'
-    INSTANCE_IP = '44.217.52.15'
   }
 
   stages {
@@ -79,24 +78,29 @@ pipeline {
 //        }
 //      }
 
-//    stage('Deploy with Ansible') {
-//      steps {
-//        sh '''
-//          mkdir -p /tmp/ansible
-//
-//          echo "[app_servers]" > /tmp/ansible/inventory.ini
-//          echo "tasknotifier ansible_host=${INSTANCE_IP} ansible_user=ubuntu ansible_ssh_private_key_file=${SSH_KEY_PATH} ansible_python_interpreter=/usr/bin/python3 ansible_ssh_common_args='-o StrictHostKeyChecking=no'" >> /tmp/ansible/inventory.ini
-//
-//          cat /tmp/ansible/inventory.ini
-//
-//          ansible tasknotifier -i /tmp/ansible/inventory.ini -m ping
-//
-//
-//
-//          ansible-playbook -i /tmp/ansible/inventory.ini ansible/deploy-playbook.yml -vv
-//        '''
-//      }
-//    }
+    stage('Generate Inventory File') {
+        steps {
+            script {
+                // Get the EC2 instance IP from Terraform output
+                def instanceIP = sh(
+                    script: 'cd terraform && terraform output -raw instance_public_ip',
+                    returnStdout: true
+                ).trim()
+
+                echo "Instance IP: ${instanceIP}"
+
+                // Generate inventory file from template
+                sh """
+                    sed 's|INSTANCE_IP_PLACEHOLDER|${instanceIP}|g; s|SSH_KEY_PATH_PLACEHOLDER|${SSH_KEY_PATH}|g' \
+                        ansible/inventory.ini.template > ansible/inventory.ini
+
+                    echo "Generated inventory file:"
+                    cat ansible/inventory.ini
+                """
+            }
+        }
+    }
+
     stage('Deploy Ansible Playbook') {
       steps {
          script {
@@ -113,8 +117,6 @@ pipeline {
                 sh '''
                     inventoryFile="/tmp/ansible_inventory.ini"
                     cat ${inventoryFile}
-
-                    chmod 744 ${inventoryFile}
 
                     export DB_URL=$DB_URL
                     export DB_USERNAME=$DB_USERNAME
