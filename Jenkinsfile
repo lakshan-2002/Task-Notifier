@@ -78,29 +78,31 @@ pipeline {
 //        }
 //      }
 
-    stage('Generate Inventory File') {
+    stage('Get Instance IP') {
         steps {
             script {
-                // Initialize Terraform and get instance IP
-                sh '''
-                    export AWS_ACCESS_KEY_ID=$AWS_CREDENTIALS_USR
-                    export AWS_SECRET_ACCESS_KEY=$AWS_CREDENTIALS_PSW
-                    cd terraform
-                    terraform init -reconfigure
-                '''
+                echo "Reading instance IP from terraform/instance_ip.txt..."
 
+                // Read the IP from the file saved by terraform
                 def instanceIP = sh(
-                    script: '''
-                        export AWS_ACCESS_KEY_ID=$AWS_CREDENTIALS_USR
-                        export AWS_SECRET_ACCESS_KEY=$AWS_CREDENTIALS_PSW
-                        cd terraform && terraform output -raw instance_public_ip
-                    ''',
+                    script: 'cat terraform/instance_ip.txt',
                     returnStdout: true
                 ).trim()
 
+                if (instanceIP == null || instanceIP.isEmpty() || !instanceIP.matches("^[0-9\\.]+\$")) {
+                    error("Could not read valid instance IP from terraform/instance_ip.txt\n" +
+                          "Please ensure the file exists and contains your EC2 instance IP address.")
+                }
+
                 echo "Instance IP: ${instanceIP}"
                 env.INSTANCE_IP = instanceIP
+            }
+        }
+    }
 
+    stage('Generate Inventory File') {
+        steps {
+            script {
                 // Generate inventory file from template
                 withCredentials([sshUserPrivateKey(
                     credentialsId: 'aws-ssh-key',
@@ -108,7 +110,7 @@ pipeline {
                 )]) {
                     sh """
                         mkdir -p /tmp/ansible
-                        sed 's|INSTANCE_IP_PLACEHOLDER|${instanceIP}|g; s|SSH_KEY_PATH_PLACEHOLDER|'"\${SSH_KEY_PATH}"'|g' \
+                        sed 's|INSTANCE_IP_PLACEHOLDER|${env.INSTANCE_IP}|g; s|SSH_KEY_PATH_PLACEHOLDER|'"\${SSH_KEY_PATH}"'|g' \
                             ansible/inventory.ini.template > /tmp/ansible/inventory.ini
 
                         echo "Generated inventory file:"
