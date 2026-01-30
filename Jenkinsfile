@@ -58,27 +58,6 @@ pipeline {
       }
     }
 
-//      stage('Get Instance IP from Terraform') {
-//        steps {
-//          dir('terraform') {
-//              sh '''
-//                export AWS_ACCESS_KEY_ID=$AWS_CREDENTIALS_USR
-//                export AWS_SECRET_ACCESS_KEY=$AWS_CREDENTIALS_PSW
-//
-//                terraform output -raw instance_public_ip > /tmp/instance_ip.txt
-//              '''
-//          }
-//
-//          script {
-//            env.INSTANCE_IP = sh(
-//              script: 'cat /tmp/instance_ip.txt',
-//              returnStdout: true
-//            ).trim()
-//            echo "Instance IP: ${env.INSTANCE_IP}"
-//          }
-//        }
-//      }
-
     stage('Generate Inventory File') {
         steps {
             script {
