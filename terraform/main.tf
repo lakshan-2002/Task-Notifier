@@ -21,7 +21,7 @@ resource "aws_security_group" "app_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["175.127.0.0/16"]
+    cidr_blocks = ["175.157.0.0/16"]
     description = "SSH from my IP range only"
   }
 
