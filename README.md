@@ -1,12 +1,7 @@
-# TaskNotifier - Full-Stack Task Management Application
+# TaskNotifier - Daily Task Reminder System with Email Notifications
 
-![DevOps Pipeline](https://img.shields.io/badge/DevOps-CI%2FCD-blue)
-![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED?logo=docker)
-![Terraform](https://img.shields.io/badge/Terraform-IaC-7B42BC?logo=terraform)
-![Ansible](https://img.shields.io/badge/Ansible-Automation-EE0000?logo=ansible)
-![Jenkins](https://img.shields.io/badge/Jenkins-CI%2FCD-D24939?logo=jenkins)
 
-A comprehensive task management application with automated deployment pipeline, featuring Spring Boot backend, React frontend, and complete DevOps automation using Jenkins, Docker, Terraform, and Ansible.
+A daily task reminder system with automated email notifications, featuring Spring Boot backend, React frontend, and complete DevOps automation using Jenkins, Docker, Terraform, and Ansible.
 
 ## 📋 Table of Contents
 
@@ -18,10 +13,10 @@ A comprehensive task management application with automated deployment pipeline, 
 - [CI/CD Pipeline](#cicd-pipeline)
 - [Local Development](#local-development)
 - [Deployment](#deployment)
-- [Configuration](#configuration)
-- [Monitoring & Troubleshooting](#monitoring--troubleshooting)
 - [Project Structure](#project-structure)
-- [Contributing](#contributing)
+- [API Endpoints](#api-endpoints)
+- [CI/CD Pipeline Optimization](#cicd-pipeline-optimization)
+- [Additional Resources](#additional-resources)
 
 ---
 
@@ -409,147 +404,6 @@ The `deploy-playbook.yml` includes:
 
 ---
 
-## ⚙️ Configuration
-
-### Database Configuration
-
-Create MySQL database:
-
-```sql
-CREATE DATABASE task_notifier;
-CREATE USER 'tasknotifier'@'%' IDENTIFIED BY 'secure_password';
-GRANT ALL PRIVILEGES ON task_notifier.* TO 'tasknotifier'@'%';
-FLUSH PRIVILEGES;
-```
-
-### Environment Variables
-
-#### Backend Environment Variables
-
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `Database_Host` | JDBC connection URL | `jdbc:mysql://localhost:3306/task_notifier` |
-| `Database_Username` | Database username | `root` |
-| `Database_Password` | Database password | `your_password` |
-| `SENDGRID_API_KEY` | SendGrid API key for emails | `SG.xxxxx` |
-| `SERVER_PORT` | Application port | `8080` |
-| `SPRING_PROFILES_ACTIVE` | Spring profile | `prod` |
-
-#### Frontend Environment Variables
-
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `VITE_API_URL` | Backend API URL | `http://44.217.52.15:8080` |
-
-### Application Properties
-
-Located at: `src/main/resources/application.properties`
-
-```properties
-spring.application.name=TaskNotifier
-spring.datasource.url=${Database_Host}
-spring.datasource.username=${Database_Username}
-spring.datasource.password=${Database_Password}
-
-# Connection pooling
-spring.datasource.hikari.pool-name=SpringBootConnectorCP
-spring.datasource.hikari.maximumPoolSize=5
-spring.datasource.hikari.minimumIdle=3
-
-# JPA Configuration
-spring.jpa.hibernate.ddl-auto=none
-spring.jpa.properties.hibernate.format_sql=true
-spring.jpa.show-sql=true
-
-# SendGrid
-sendgrid.api.key=${SENDGRID_API_KEY}
-```
-
----
-
-## 📊 Monitoring & Troubleshooting
-
-### Health Checks
-
-- **Backend Health**: `http://<INSTANCE_IP>:8080/actuator/health`
-- **Frontend**: `http://<INSTANCE_IP>:5173`
-
-### View Container Logs
-
-```bash
-# SSH into EC2 instance
-ssh -i your-key.pem ubuntu@<INSTANCE_IP>
-
-# View backend logs
-docker logs -f tasknotifier-backend
-
-# View frontend logs
-docker logs -f tasknotifier-frontend
-
-# View all containers
-docker ps -a
-```
-
-### Common Issues & Solutions
-
-#### Issue: Ansible Connection Failed
-
-**Error**: `Permission denied (publickey)`
-
-**Solution**:
-- Verify SSH key is correctly configured in Jenkins credentials
-- Check EC2 security group allows SSH from Jenkins server
-- Ensure correct username (ubuntu for Ubuntu instances)
-
-#### Issue: Docker Build Taking Too Long
-
-**Error**: Downloads dependencies repeatedly
-
-**Solution**:
-- Pipeline uses layer caching with `--cache-from`
-- Backend uses Maven dependency caching
-- Frontend uses `npm ci` for consistent installs
-
-#### Issue: Container Failed to Start
-
-**Error**: Database connection failed
-
-**Solution**:
-- Verify database is accessible from EC2 instance
-- Check security groups allow database port
-- Verify environment variables are correctly passed
-- Check database credentials
-
-#### Issue: Inventory Parse Error
-
-**Error**: `Failed to parse /tmp/ansible/inventory.ini`
-
-**Solution**:
-- Ensure `INSTANCE_IP` is set correctly in Jenkinsfile
-- Check inventory file format in "Generate Inventory File" stage
-- Verify no extra spaces or special characters
-
-#### Issue: Images Not Using Cache
-
-**Solution**:
-- Ensure `DOCKER_BUILDKIT=1` is set
-- Use `--build-arg BUILDKIT_INLINE_CACHE=1`
-- Pull existing images before building
-
-### Jenkins Pipeline Debugging
-
-```bash
-# View Jenkins workspace
-cd /var/lib/jenkins/workspace/<job-name>
-
-# Check generated inventory
-cat /tmp/ansible/inventory.ini
-
-# Test Ansible connectivity
-ansible tasknotifier -i /tmp/ansible/inventory.ini -m ping
-```
-
----
 
 ## 📁 Project Structure
 
@@ -621,47 +475,6 @@ TaskNotifier/
 
 ---
 
-## 🔐 Security Best Practices
-
-1. **Credentials Management**
-   - All sensitive data stored in Jenkins credentials
-   - Never commit credentials to repository
-   - Use `.gitignore` for sensitive files
-
-2. **Network Security**
-   - EC2 security group restricts SSH access
-   - Database not publicly accessible
-   - CORS configured in backend
-
-3. **Container Security**
-   - Multi-stage builds reduce image size
-   - Non-root user in containers (recommended)
-   - Regular image updates
-
-4. **SSH Key Management**
-   - Private keys stored securely in Jenkins
-   - Key rotation recommended quarterly
-   - Restrict SSH access by IP when possible
-
----
-
-## 🚦 Getting Started Checklist
-
-- [ ] Install required software (Java, Node.js, Docker, Terraform)
-- [ ] Set up AWS account and create access keys
-- [ ] Create DockerHub account
-- [ ] Create SendGrid account and get API key
-- [ ] Set up MySQL database
-- [ ] Configure Terraform variables
-- [ ] Provision infrastructure with Terraform
-- [ ] Set up Jenkins server
-- [ ] Configure Jenkins credentials
-- [ ] Update Jenkinsfile with EC2 instance IP
-- [ ] Run Jenkins pipeline
-- [ ] Verify deployment
-- [ ] Access application
-
----
 
 ## 📝 API Endpoints
 
@@ -710,41 +523,6 @@ The frontend Dockerfile:
 
 ---
 
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
----
-
-## 📄 License
-
-This project is part of a DevOps learning exercise. Feel free to use and modify as needed.
-
----
-
-## 👤 Author
-
-**Lakshan**
-- Email: [Your Email]
-- GitHub: [@lakshan2002](https://github.com/lakshan2002)
-
----
-
-## 🙏 Acknowledgments
-
-- Spring Boot community
-- React and Vite teams
-- HashiCorp (Terraform)
-- Red Hat (Ansible)
-- Jenkins community
-- Docker team
-
----
-
 ## 📚 Additional Resources
 
 ### Documentation
@@ -763,14 +541,5 @@ This project is part of a DevOps learning exercise. Feel free to use and modify 
 
 ---
 
-## 📞 Support
-
-For issues and questions:
-1. Check the [Troubleshooting](#monitoring--troubleshooting) section
-2. Review Jenkins console output
-3. Check container logs
-4. Open an issue in the repository
-
----
 
 **Happy DevOps! 🚀**
