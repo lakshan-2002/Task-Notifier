@@ -1,7 +1,7 @@
 # TaskNotifier - Daily Task Reminder System with Email Notifications
 
 
-A daily task reminder system with automated email notifications, featuring Spring Boot backend, React frontend, and complete DevOps automation using Jenkins, Docker, Terraform, and Ansible.
+A daily task reminder system with automated email notifications, featuring Spring Boot backend, React frontend, and complete DevOps automation using Jenkins, Docker, Terraform, Ansible and AWS(EC2).
 
 ## 📋 Table of Contents
 
